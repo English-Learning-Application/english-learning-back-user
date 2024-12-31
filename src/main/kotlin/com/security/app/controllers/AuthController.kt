@@ -1,9 +1,9 @@
 package com.security.app.controllers
 
-import com.security.app.dao.LoginResponse
-import com.security.app.dtos.LoginDTO
-import com.security.app.dtos.RegisterDTO
 import com.security.app.model.Message
+import com.security.app.requests.LoginRequest
+import com.security.app.requests.RegisterRequest
+import com.security.app.responses.LoginResponse
 import com.security.app.services.UserService
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.PostMapping
@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController
 class AuthController(private val userService: UserService) {
 
     @PostMapping("/register")
-    fun register(@RequestBody request : RegisterDTO) : ResponseEntity<LoginResponse> {
+    fun register(@RequestBody request : RegisterRequest) : ResponseEntity<LoginResponse> {
         val loginResponse = userService.registerUser(
             request
         )
@@ -25,7 +25,7 @@ class AuthController(private val userService: UserService) {
     }
 
     @PostMapping("/login")
-    fun login(@RequestBody request: LoginDTO) : ResponseEntity<Any> {
+    fun login(@RequestBody request: LoginRequest) : ResponseEntity<Any> {
         val loginResponse = userService.loginUser(
             request.email,
             request.password

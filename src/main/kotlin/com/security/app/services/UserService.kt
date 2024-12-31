@@ -1,11 +1,10 @@
 package com.security.app.services
 
-import com.security.app.dao.LoginResponse
-import com.security.app.dtos.RegisterDTO
 import com.security.app.entities.User
 import com.security.app.repositories.UserRepository
+import com.security.app.requests.RegisterRequest
+import com.security.app.responses.LoginResponse
 import com.security.app.utils.JwtTokenUtils
-import io.jsonwebtoken.Jwts
 import jakarta.transaction.Transactional
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
@@ -27,7 +26,7 @@ class UserService(private val userRepository: UserRepository,
     }
 
     @Transactional
-    fun registerUser(registerDTO: RegisterDTO) : LoginResponse? {
+    fun registerUser(registerDTO: RegisterRequest) : LoginResponse? {
         val newUser = User().apply {
             email = registerDTO.email
             password = passwordEncoder.encode(registerDTO.password)

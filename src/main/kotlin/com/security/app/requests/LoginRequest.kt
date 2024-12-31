@@ -1,6 +1,6 @@
-package com.security.app.dtos
+package com.security.app.requests
 
-class RegisterDTO {
+class LoginRequest {
     val email: String = ""
     val password: String = ""
 }

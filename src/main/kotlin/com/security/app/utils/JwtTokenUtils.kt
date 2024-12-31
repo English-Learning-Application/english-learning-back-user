@@ -8,11 +8,11 @@ import java.util.*
 import javax.crypto.spec.SecretKeySpec
 
 @Component
-class JwtTokenUtils (
-    @Value("\${jwt.secret}") private val secret:  String = ""
-)
+class JwtTokenUtils
 {
-    private val jwtIssuer = "myIssuer"
+    private val secret: String = System.getenv("JWT_SECRET")
+
+    private val jwtIssuer : String = System.getenv("JWT_ISSUER")
     private val signingKey: SecretKeySpec
         get() {
             val keyBytes: ByteArray = Base64.getDecoder().decode(secret)

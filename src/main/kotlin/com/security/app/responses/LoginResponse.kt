@@ -1,4 +1,4 @@
-package com.security.app.dao
+package com.security.app.responses
 
 data class LoginResponse(
     val accessToken: String,
