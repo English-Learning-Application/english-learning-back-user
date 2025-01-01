@@ -1,5 +1,8 @@
 package com.security.app.config
 
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier
+import com.google.api.client.http.javanet.NetHttpTransport
+import com.google.api.client.json.gson.GsonFactory
 import com.security.app.filters.JwtAuthorizationFilter
 import com.security.app.repositories.UserRepository
 import com.security.app.services.JwtUserDetailService
@@ -21,6 +24,8 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @Configuration
 @EnableWebSecurity
 class SecurityConfig {
+    val googleClientId = System.getenv()["GOOGLE_CLIENT_ID"]
+
     @Bean
     fun userDetailsService(userRepository: UserRepository): UserDetailsService =
         JwtUserDetailService(userRepository)
@@ -61,4 +66,16 @@ class SecurityConfig {
     @Bean
     fun authenticationManager(config: AuthenticationConfiguration): AuthenticationManager =
         config.authenticationManager
+
+    @Bean
+    fun googleIdTokenVerifier(): GoogleIdTokenVerifier {
+        return GoogleIdTokenVerifier.Builder(
+            NetHttpTransport(),
+            GsonFactory()
+        ).setAudience(
+            listOf(
+                googleClientId
+            )
+        ).build()
+    }
 }
