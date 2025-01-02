@@ -1,0 +1,93 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: user-service
+  labels:
+    app: user-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: user-service
+  template:
+    metadata:
+      labels:
+        app: user-service
+    spec:
+      containers:
+        - name: user-service-container
+          imagePullPolicy: IfNotPresent
+          image: "asia-southeast1-docker.pkg.dev/generated-case-406100/dev-container/user-service:v1.0.0"
+          ports:
+            - containerPort: 8080
+          env:
+            - name: MODE
+              valueFrom:
+                secretKeyRef:
+                  name: user-service-secret
+                  key: MODE
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: user-service-secret
+                  key: JWT_SECRET
+            - name: JWT_ISSUER
+              valueFrom:
+                secretKeyRef:
+                  name: user-service-secret
+                  key: SECRET_ISSUER
+            - name: GOOGLE_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: user-service-secret
+                  key: GOOGLE_CLIENT_ID
+            - name: FACEBOOK_APP_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: user-service-secret
+                  key: FACEBOOK_APP_SECRET
+            - name: FACEBOOK_APP_ID
+              valueFrom:
+                secretKeyRef:
+                  name: user-service-secret
+                  key: FACEBOOK_APP_ID
+            - name: DB_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: user-service-secret
+                  key: DB_NAME
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: user-service-secret
+                  key: DB_PASSWORD
+            - name: DB_USER
+              valueFrom:
+                  secretKeyRef:
+                    name: user-service-secret
+                    key: DB_USER
+            - name: DB_PORT
+              valueFrom:
+                secretKeyRef:
+                  name: user-service-secret
+                  key: DB_PORT
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "128m"
+            limits:
+              memory: "256Mi"
+              cpu: "256m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: user-cluster-ip-service
+spec:
+  selector:
+    app: user-service
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
+  type: ClusterIP
