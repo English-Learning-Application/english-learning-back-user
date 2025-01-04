@@ -7,20 +7,18 @@ import com.security.app.requests.LoginRequest
 import com.security.app.requests.RegisterRequest
 import com.security.app.services.UserService
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("/api/v1/auth")
 class AuthController(private val userService: UserService) {
 
     @PostMapping("/register")
-    fun register(@RequestBody request : RegisterRequest) : ResponseEntity<Any> {
+    fun register(@RequestBody request : RegisterRequest, @RequestHeader("X-Device-Id") deviceId: String) : ResponseEntity<Any> {
+
         try{
             val loginResponse = userService.registerUser(
-                request
+                request, deviceId
             )
 
             return ResponseEntity.ok(Message.Success("User registered successfully", loginResponse))
@@ -31,9 +29,9 @@ class AuthController(private val userService: UserService) {
     }
 
     @PostMapping("/google")
-    fun googleRegistration(@RequestBody request: GoogleSignInRequest) : ResponseEntity<Any> {
+    fun googleRegistration(@RequestBody request: GoogleSignInRequest, @RequestHeader("X-Device-Id") deviceId: String) : ResponseEntity<Any> {
         try {
-            val resp = userService.googleSignInUser(request.idToken)
+            val resp = userService.googleSignInUser(request.idToken, deviceId)
             return ResponseEntity.ok(Message.Success("User registered successfully", resp))
         } catch (e: Exception) {
             return ResponseEntity.badRequest().body(Message.BadRequest<String>(e.message.toString()))
@@ -41,9 +39,9 @@ class AuthController(private val userService: UserService) {
     }
 
     @PostMapping("/facebook")
-    fun facebookRegistration(@RequestBody request: FacebookSignInRequest) : ResponseEntity<Any> {
+    fun facebookRegistration(@RequestBody request: FacebookSignInRequest, @RequestHeader("X-Device-Id") deviceId: String) : ResponseEntity<Any> {
         try {
-            val resp = userService.facebookSignInUser(request.accessToken)
+            val resp = userService.facebookSignInUser(request.accessToken, deviceId)
             return ResponseEntity.ok(Message.Success("User registered successfully", resp))
         } catch (e: Exception) {
             return ResponseEntity.badRequest().body(Message.BadRequest<String>(e.message.toString()))
@@ -51,10 +49,12 @@ class AuthController(private val userService: UserService) {
     }
 
     @PostMapping("/login")
-    fun login(@RequestBody request: LoginRequest) : ResponseEntity<Any> {
+    fun login(@RequestBody request: LoginRequest, @RequestHeader("X-Device-Id") deviceId: String) : ResponseEntity<Any> {
+        println("Login request received")
         val loginResponse = userService.loginUser(
             request.email,
-            request.password
+            request.password,
+            deviceId
         )
 
         return if (loginResponse != null) {

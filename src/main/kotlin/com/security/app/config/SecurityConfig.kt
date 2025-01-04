@@ -20,11 +20,17 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.security.web.SecurityFilterChain
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
+import org.springframework.web.reactive.function.client.WebClient
 
 @Configuration
 @EnableWebSecurity
 class SecurityConfig {
     val googleClientId = System.getenv()["GOOGLE_CLIENT_ID"]
+
+    @Bean
+    fun webClient(): WebClient {
+        return WebClient.builder().build()
+    }
 
     @Bean
     fun userDetailsService(userRepository: UserRepository): UserDetailsService =

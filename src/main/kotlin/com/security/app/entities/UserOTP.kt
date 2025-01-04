@@ -1,11 +1,13 @@
 package com.security.app.entities
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import jakarta.persistence.*
 import lombok.*
 import org.springframework.data.annotation.CreatedDate
 import org.springframework.data.annotation.LastModifiedDate
 import org.springframework.data.jpa.domain.support.AuditingEntityListener
 import java.time.LocalDateTime
+import java.util.*
 
 @Entity
 @Setter
@@ -20,10 +22,11 @@ import java.time.LocalDateTime
 class UserOTP {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    var userOTPId: String = ""
+    lateinit var userOTPId: UUID
 
     @ManyToOne
     @JoinColumn(name = "userId")
+    @JsonIgnore
     var user: User? = null
 
     @Column(nullable = false)

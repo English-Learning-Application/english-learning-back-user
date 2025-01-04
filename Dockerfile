@@ -22,8 +22,13 @@ COPY ./src ./src
 # Build the application using Gradle
 RUN ./gradlew bootJar --no-daemon
 
-# Use another minimal image for runtime with Java 21
-FROM openjdk:21-jdk-slim
+# Use an Ubuntu base image for runtime
+FROM ubuntu:22.04
+
+# Install Java 21 runtime
+RUN apt-get update && apt-get install -y \
+    openjdk-21-jdk-headless \
+    && rm -rf /var/lib/apt/lists/*
 
 # Set the working directory
 WORKDIR /app

@@ -1,9 +1,8 @@
 package com.security.app.utils
 
 import io.jsonwebtoken.Claims
-import org.springframework.stereotype.Component
 import io.jsonwebtoken.Jwts
-import org.springframework.beans.factory.annotation.Value
+import org.springframework.stereotype.Component
 import java.util.*
 import javax.crypto.spec.SecretKeySpec
 
@@ -20,10 +19,10 @@ class JwtTokenUtils
         }
 
 
-    fun generateToken(email: String, expiration: Long): String {
+    fun generateToken(userId: UUID, expiration: Long): String {
         val expirationTime = Date(System.currentTimeMillis() + expiration)
         return Jwts.builder()
-            .setSubject(email)
+            .setSubject(userId.toString())
             .setIssuer(jwtIssuer)
             .setIssuedAt(Date())
             .setExpiration(expirationTime)
@@ -31,10 +30,11 @@ class JwtTokenUtils
             .compact()
     }
 
-    fun getEmailFromToken(token: String): String? {
+    fun getUserId(token: String): String? {
         val claims: Claims? = validateToken(token)
         return claims?.subject
     }
+
 
     private fun validateToken(token: String): Claims? {
         try {

@@ -1,6 +1,7 @@
 package com.security.app.entities
 
 import com.fasterxml.jackson.annotation.JsonIgnore
+import com.security.app.model.RegistrationStatus
 import jakarta.persistence.*
 import jakarta.validation.constraints.NotBlank
 import lombok.*
@@ -9,6 +10,7 @@ import org.springframework.data.annotation.CreatedDate
 import org.springframework.data.annotation.LastModifiedDate
 import org.springframework.data.jpa.domain.support.AuditingEntityListener
 import java.time.LocalDateTime
+import java.util.*
 
 @Entity
 @Setter
@@ -23,7 +25,7 @@ import java.time.LocalDateTime
 class User {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    var userId: String = ""
+    lateinit var userId: UUID
 
     @Column(unique = true, nullable = false)
     @NotBlank(message = "Email is required")
@@ -69,4 +71,7 @@ class User {
 
     @OneToMany(mappedBy = "user", cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
     var userAchievements: List<UserAchievement> = mutableListOf()
+
+    @Column(nullable = false)
+    var registrationStatus: RegistrationStatus = RegistrationStatus.NOT_CONFIRMED
 }

@@ -1,11 +1,13 @@
 package com.security.app.entities
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import jakarta.persistence.*
 import lombok.*
 import org.springframework.data.annotation.CreatedDate
 import org.springframework.data.annotation.LastModifiedDate
 import org.springframework.data.jpa.domain.support.AuditingEntityListener
 import java.time.LocalDateTime
+import java.util.*
 
 @Entity
 @Setter
@@ -20,9 +22,9 @@ import java.time.LocalDateTime
 class UserRefreshToken {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    var userRefreshTokenId: String = ""
+    lateinit var userRefreshTokenId: UUID
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
     var deviceId: String = ""
 
     @Column(nullable = false)
@@ -30,6 +32,7 @@ class UserRefreshToken {
 
     @ManyToOne
     @JoinColumn(name = "userId")
+    @JsonIgnore
     var user: User? = null
 
     @CreatedDate

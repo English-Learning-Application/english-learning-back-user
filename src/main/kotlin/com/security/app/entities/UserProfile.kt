@@ -1,5 +1,6 @@
 package com.security.app.entities
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import com.security.app.model.Language
 import com.security.app.model.LearningType
 import jakarta.persistence.*
@@ -8,6 +9,7 @@ import org.springframework.data.annotation.CreatedDate
 import org.springframework.data.annotation.LastModifiedDate
 import org.springframework.data.jpa.domain.support.AuditingEntityListener
 import java.time.LocalDateTime
+import java.util.*
 
 @Entity
 @Setter
@@ -22,10 +24,11 @@ import java.time.LocalDateTime
 class UserProfile {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    var userProfileId: String = ""
+    lateinit var userProfileId: UUID
 
     @OneToOne
     @JoinColumn(name = "userId", referencedColumnName = "userId")
+    @JsonIgnore
     var user: User? = null
 
     @Column(nullable = false)

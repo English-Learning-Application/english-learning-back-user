@@ -1,8 +1,8 @@
 package com.security.app.repositories
 
-import com.security.app.entities.UserProfile
+import com.security.app.entities.UserOTP
 import org.springframework.data.jpa.repository.JpaRepository
 import java.util.*
 
-interface UserProfileRepository : JpaRepository<UserProfile, UUID> {
+interface UserOTPRepository : JpaRepository<UserOTP, UUID> {
 }

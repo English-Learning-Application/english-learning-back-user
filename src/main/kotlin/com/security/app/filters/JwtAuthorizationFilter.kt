@@ -10,7 +10,6 @@ import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource
 import org.springframework.stereotype.Component
-import org.springframework.util.StringUtils
 import org.springframework.web.filter.OncePerRequestFilter
 
 @Component
@@ -29,13 +28,13 @@ class JwtAuthorizationFilter(
         if (null != authorizationHeader && authorizationHeader.startsWith("Bearer ")) {
             try {
                 val token: String = authorizationHeader.substringAfter("Bearer ")
-                val username: String = jwtTokenUtil.getEmailFromToken(token) ?: ""
+                val userId: String = jwtTokenUtil.getUserId(token) ?: ""
 
 
                 if (SecurityContextHolder.getContext().authentication == null) {
-                    val userDetails: UserDetails = userDetailsService.loadUserByUsername(username)
+                    val userDetails: UserDetails = userDetailsService.loadUserByUsername(userId)
 
-                    if (username == userDetails.username) {
+                    if (userId == userDetails.username) {
                         val authToken = UsernamePasswordAuthenticationToken(
                             userDetails, null, userDetails.authorities
                         )
