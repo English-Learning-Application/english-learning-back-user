@@ -29,6 +29,11 @@ class UserRefreshTokenService(
         return userRefreshTokenRepository.save(userRefreshToken)
     }
 
+    @Transactional
+    fun removeRefreshToken(userRefreshToken: UserRefreshToken) {
+        userRefreshTokenRepository.delete(userRefreshToken)
+    }
+
     fun getRefreshTokenByUserIdAndDeviceId(userId: UUID, deviceId: String) : UserRefreshToken? {
         return userRefreshTokenRepository.findUserRefreshTokenByUserIdAndDeviceId(userId, deviceId)
     }

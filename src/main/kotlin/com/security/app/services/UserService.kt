@@ -22,16 +22,17 @@ import org.springframework.web.reactive.function.client.WebClient
 import java.util.*
 
 @Service
-class UserService(private val userRepository: UserRepository,
-                  private val userDetailsService: UserDetailsService,
-                  private val authManager: AuthenticationManager,
-                  private val jwtTokenUtils: JwtTokenUtils,
-                  private val googleIdTokenVerifier: GoogleIdTokenVerifier,
-       private val passwordEncoder: PasswordEncoder,
-        private val facebookVerifier: FacebookVerifier,
+class UserService(
+    private val userRepository: UserRepository,
+    private val userDetailsService: UserDetailsService,
+    private val authManager: AuthenticationManager,
+    private val jwtTokenUtils: JwtTokenUtils,
+    private val googleIdTokenVerifier: GoogleIdTokenVerifier,
+    private val passwordEncoder: PasswordEncoder,
+    private val facebookVerifier: FacebookVerifier,
     private val userRefreshTokenService: UserRefreshTokenService,
-    private val webClient: WebClient
-    ) {
+    private val webClient: WebClient,
+) {
 
     private val MEDIA_SERVICE_URL = System.getenv("MEDIA_SERVICE_URL")
 
@@ -47,6 +48,7 @@ class UserService(private val userRepository: UserRepository,
         val userRefreshToken = userRefreshTokenService.getRefreshTokenByUserIdAndDeviceId(user.userId, deviceId) ?: return null
 
         if(userRefreshToken.refreshToken != refreshToken || !isTokenStillValid(refreshToken)) {
+            userRefreshTokenService.removeRefreshToken(userRefreshToken)
             return null
         }
 
@@ -74,6 +76,7 @@ class UserService(private val userRepository: UserRepository,
                 }
 
                 val refreshToken = createRefreshToken(userExists.userId)
+                userRefreshTokenService.saveRefreshToken(refreshToken, userExists, deviceId)
 
                 return LoginResponse(accessToken, refreshToken)
             }
@@ -93,6 +96,7 @@ class UserService(private val userRepository: UserRepository,
 
             val accessToken = createAccessToken(savedUser.userId)
             val refreshToken = createRefreshToken(savedUser.userId)
+            userRefreshTokenService.saveRefreshToken(refreshToken, savedUser, deviceId)
 
             return LoginResponse(accessToken, refreshToken)
         }
@@ -122,6 +126,7 @@ class UserService(private val userRepository: UserRepository,
             }
 
             val refreshToken = createRefreshToken(existingUser.userId)
+            userRefreshTokenService.saveRefreshToken(refreshToken, existingUser, deviceId)
             return LoginResponse(aToken, refreshToken)
         }
 
@@ -139,6 +144,7 @@ class UserService(private val userRepository: UserRepository,
 
         val aToken = createAccessToken(savedUser.userId)
         val refreshToken = createRefreshToken(savedUser.userId)
+        userRefreshTokenService.saveRefreshToken(refreshToken, savedUser, deviceId)
 
         return LoginResponse(aToken, refreshToken)
     }
@@ -160,6 +166,7 @@ class UserService(private val userRepository: UserRepository,
 
         val accessToken = createAccessToken(savedUser.userId)
         val refreshToken = createRefreshToken(savedUser.userId)
+        userRefreshTokenService.saveRefreshToken(refreshToken, savedUser, deviceId)
 
         val newUserRefreshToken = userRefreshTokenService.saveRefreshToken(refreshToken, savedUser, deviceId)
 
@@ -246,6 +253,8 @@ class UserService(private val userRepository: UserRepository,
     fun registrationCompletion(request: RegistrationCompletionRequest, userId: UUID ) : UserResponse? {
         val user = userRepository.findByUserId(userId) ?: return null
 
+        var resultUser : UserResponse? = null
+
         user.userProfile?.let {
             it.nativeLanguage = Language.fromString(request.nativeLanguage)
             it.learningLanguage = Language.fromString(request.learningLanguage)
@@ -262,11 +271,16 @@ class UserService(private val userRepository: UserRepository,
 
             user.registrationStatus = RegistrationStatus.CONFIRMED
 
-            userRepository.save(user)
+            val savedUser = userRepository.save(user)
 
+            resultUser = UserResponse.fromUser(savedUser)
+            if(savedUser.mediaId.isNotEmpty()) {
+                val mediaModel = getUserMedia(UUID.fromString(savedUser.mediaId))
 
+                resultUser?.media = mediaModel
+            }
         }
 
-        return null
+        return resultUser
     }
 }

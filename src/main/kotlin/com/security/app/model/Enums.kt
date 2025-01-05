@@ -1,14 +1,16 @@
 package com.security.app.model
 
 enum class Language(val value: String) {
-    VIETNAMESE("VI"),
-    ENGLISH("EN");
+    VIETNAMESE("VIETNAMESE"),
+    ENGLISH("ENGLISH"),
+    FRENCH("FRENCH");
 
     companion object {
         fun fromString(value: String): Language {
             return when(value) {
-                "VI" -> VIETNAMESE
-                "EN" -> ENGLISH
+                "VIETNAMESE" -> VIETNAMESE
+                "ENGLISH" -> ENGLISH
+                "FRENCH" -> FRENCH
                 else -> throw IllegalArgumentException("Language not found")
             }
         }
