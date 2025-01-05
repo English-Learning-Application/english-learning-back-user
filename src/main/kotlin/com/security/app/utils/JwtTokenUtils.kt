@@ -35,6 +35,11 @@ class JwtTokenUtils
         return claims?.subject
     }
 
+    fun isTokenStillValid(token: String): Boolean {
+        val claims: Claims? = validateToken(token)
+        return claims?.expiration?.after(Date()) ?: false
+    }
+
 
     private fun validateToken(token: String): Claims? {
         try {

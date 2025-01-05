@@ -1,11 +1,9 @@
 package com.security.app.controllers
 
 import com.security.app.model.Message
-import com.security.app.requests.FacebookSignInRequest
-import com.security.app.requests.GoogleSignInRequest
-import com.security.app.requests.LoginRequest
-import com.security.app.requests.RegisterRequest
+import com.security.app.requests.*
 import com.security.app.services.UserService
+import org.springframework.http.HttpStatusCode
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
@@ -24,6 +22,20 @@ class AuthController(private val userService: UserService) {
             return ResponseEntity.ok(Message.Success("User registered successfully", loginResponse))
         }
         catch(e: Exception){
+            return ResponseEntity.badRequest().body(Message.BadRequest<String>(e.message.toString()))
+        }
+    }
+
+    @PostMapping("/refresh-token")
+    fun refreshToken(@RequestHeader("X-Device-Id") deviceId: String, @RequestBody request: RefreshTokenRequest) : ResponseEntity<Any> {
+        try {
+            val resp = userService.refreshToken(request.refreshToken, deviceId)
+            return if(resp != null) {
+                ResponseEntity.ok(Message.Success("Token refreshed successfully", resp))
+            } else{
+                ResponseEntity.status(HttpStatusCode.valueOf(401)).body(Message.BadRequest<String>("Invalid refresh token"))
+            }
+        } catch (e: Exception) {
             return ResponseEntity.badRequest().body(Message.BadRequest<String>(e.message.toString()))
         }
     }

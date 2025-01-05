@@ -1,14 +1,14 @@
 package com.security.app.model
 
 enum class Language(val value: String) {
-    VIETNAMESE("vi"),
-    ENGLISH("en");
+    VIETNAMESE("VI"),
+    ENGLISH("EN");
 
     companion object {
         fun fromString(value: String): Language {
             return when(value) {
-                "vi" -> VIETNAMESE
-                "en" -> ENGLISH
+                "VI" -> VIETNAMESE
+                "EN" -> ENGLISH
                 else -> throw IllegalArgumentException("Language not found")
             }
         }
@@ -16,22 +16,22 @@ enum class Language(val value: String) {
 }
 
 enum class LearningType(val value: String) {
-    VOCABULARY("vocabulary"),
-    GRAMMAR("grammar"),
-    LISTENING("listening"),
-    SPEAKING("speaking"),
-    READING("reading"),
-    WRITING("writing");
+    VOCABULARY("VOCABULARY"),
+    GRAMMAR("GRAMMAR"),
+    LISTENING("LISTENING"),
+    SPEAKING("SPEAKING"),
+    READING("READING"),
+    WRITING("WRITING");
 
     companion object {
         fun fromString(value: String): LearningType {
             return when(value) {
-                "vocabulary" -> VOCABULARY
-                "grammar" -> GRAMMAR
-                "listening" -> LISTENING
-                "speaking" -> SPEAKING
-                "reading" -> READING
-                "writing" -> WRITING
+                "VOCABULARY" -> VOCABULARY
+                "GRAMMAR" -> GRAMMAR
+                "LISTENING" -> LISTENING
+                "SPEAKING" -> SPEAKING
+                "READING" -> READING
+                "WRITING" -> WRITING
                 else -> throw IllegalArgumentException("Learning type not found")
             }
         }

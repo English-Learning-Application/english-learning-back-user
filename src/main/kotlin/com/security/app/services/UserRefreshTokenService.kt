@@ -24,6 +24,11 @@ class UserRefreshTokenService(
         return userRefreshTokenRepository.save(userRefreshToken)
     }
 
+    @Transactional
+    fun saveUserRefreshToken(userRefreshToken: UserRefreshToken) : UserRefreshToken {
+        return userRefreshTokenRepository.save(userRefreshToken)
+    }
+
     fun getRefreshTokenByUserIdAndDeviceId(userId: UUID, deviceId: String) : UserRefreshToken? {
         return userRefreshTokenRepository.findUserRefreshTokenByUserIdAndDeviceId(userId, deviceId)
     }

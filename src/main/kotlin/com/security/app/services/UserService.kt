@@ -11,6 +11,7 @@ import com.security.app.requests.RegistrationCompletionRequest
 import com.security.app.responses.LoginResponse
 import com.security.app.responses.UserResponse
 import com.security.app.utils.JwtTokenUtils
+import com.security.app.utils.toUUID
 import jakarta.transaction.Transactional
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
@@ -36,6 +37,22 @@ class UserService(private val userRepository: UserRepository,
 
     private fun saveUser(user : User) : User {
         return userRepository.save(user)
+    }
+
+    @Transactional
+    fun refreshToken(refreshToken: String, deviceId: String) : LoginResponse? {
+        val userId = jwtTokenUtils.getUserId(refreshToken)
+        val user = userId?.toUUID()?.let { userRepository.findByUserId(it) } ?: return null
+
+        val userRefreshToken = userRefreshTokenService.getRefreshTokenByUserIdAndDeviceId(user.userId, deviceId) ?: return null
+
+        if(userRefreshToken.refreshToken != refreshToken || !isTokenStillValid(refreshToken)) {
+            return null
+        }
+
+        val newAccessToken = createAccessToken(user.userId)
+
+        return LoginResponse(newAccessToken, userRefreshToken.refreshToken)
     }
 
     @Transactional
@@ -209,6 +226,10 @@ class UserService(private val userRepository: UserRepository,
     private fun createRefreshToken(userId: UUID) : String {
         // Refresh token expires in 1 week, duration in milliseconds
         return jwtTokenUtils.generateToken(userId, 604800000)
+    }
+
+    private fun isTokenStillValid(token: String): Boolean {
+        return jwtTokenUtils.isTokenStillValid(token)
     }
 
     private fun getUserMedia(mediaId: UUID) : MediaModel? {
