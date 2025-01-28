@@ -20,6 +20,10 @@ class UserResponse {
 
     var phoneNumber: String? = null
 
+    var isEmailVerified: Boolean = false
+
+    var isPhoneNumberVerified: Boolean = false
+
     var userRefreshTokens: List<UserRefreshToken> = mutableListOf()
 
     var userSubscriptions: List<UserSubscription> = mutableListOf()
@@ -31,7 +35,7 @@ class UserResponse {
     var registrationStatus: RegistrationStatus = RegistrationStatus.NOT_CONFIRMED
 
     companion object {
-        fun fromUser(user: User) : UserResponse {
+        fun fromUser(user: User): UserResponse {
             return UserResponse().apply {
                 userId = user.userId
                 email = user.email
@@ -44,6 +48,8 @@ class UserResponse {
                 userProfile = user.userProfile
                 userAchievements = user.userAchievements
                 registrationStatus = user.registrationStatus
+                isEmailVerified = user.isEmailVerified
+                isPhoneNumberVerified = user.isPhoneNumberVerified
             }
         }
     }
