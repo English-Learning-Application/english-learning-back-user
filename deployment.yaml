@@ -26,6 +26,11 @@ spec:
                 secretKeyRef:
                   name: user-service-secret
                   key: MODE
+            - name: NOTIFICATION_SERVICE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: user-service-secret
+                  key: NOTIFICATION_SERVICE_URL
             - name: JWT_SECRET
               valueFrom:
                 secretKeyRef:
@@ -53,9 +58,9 @@ spec:
                   key: FACEBOOK_APP_ID
             - name: DB_HOST
               valueFrom:
-                  secretKeyRef:
-                    name: user-service-secret
-                    key: DB_HOST
+                secretKeyRef:
+                  name: user-service-secret
+                  key: DB_HOST
             - name: DB_NAME
               valueFrom:
                 secretKeyRef:
@@ -68,9 +73,9 @@ spec:
                   key: DB_PASSWORD
             - name: DB_USER
               valueFrom:
-                  secretKeyRef:
-                    name: user-service-secret
-                    key: DB_USER
+                secretKeyRef:
+                  name: user-service-secret
+                  key: DB_USER
             - name: DB_PORT
               valueFrom:
                 secretKeyRef:

@@ -8,6 +8,7 @@ import com.security.app.model.*
 import com.security.app.repositories.UserRepository
 import com.security.app.requests.RegisterRequest
 import com.security.app.requests.RegistrationCompletionRequest
+import com.security.app.requests.UpdateUserNotificationCredentialRequest
 import com.security.app.responses.LoginResponse
 import com.security.app.responses.UserResponse
 import com.security.app.utils.JwtTokenUtils
@@ -31,6 +32,8 @@ class UserService(
     private val passwordEncoder: PasswordEncoder,
     private val facebookVerifier: FacebookVerifier,
     private val userRefreshTokenService: UserRefreshTokenService,
+    private val notificationService: NotificationService,
+    private val userOtpService: UserOtpService,
     private val webClient: WebClient,
 ) {
 
@@ -48,7 +51,7 @@ class UserService(
         val userRefreshToken =
             userRefreshTokenService.getRefreshTokenByUserIdAndDeviceId(user.userId, deviceId) ?: return null
 
-        if (userRefreshToken.refreshToken != refreshToken || !isTokenStillValid(refreshToken)) {
+        if (userRefreshToken.refreshToken == refreshToken && !isTokenStillValid(refreshToken)) {
             userRefreshTokenService.removeRefreshToken(userRefreshToken)
             return null
         }
@@ -196,10 +199,18 @@ class UserService(
         if (user.mediaId.isNotEmpty()) {
             val mediaModel = getUserMedia(UUID.fromString(user.mediaId))
 
-            println("Media model: $mediaModel")
-
             userResponse.media = mediaModel ?: return null
         }
+
+        notificationService.updateUserNotificationCredential(
+            UpdateUserNotificationCredentialRequest(
+                user.userId.toString(),
+                user.username,
+                user.email,
+                user.phoneNumber,
+                null
+            )
+        ) ?: return null
 
         return userResponse
     }
@@ -300,5 +311,44 @@ class UserService(
         }
 
         return resultUser
+    }
+
+    fun updateFcmToken(userId: UUID, fcmToken: String): Any? {
+        val user = userRepository.findByUserId(userId) ?: return null
+
+        notificationService.updateUserNotificationCredential(
+            UpdateUserNotificationCredentialRequest(
+                user.userId.toString(),
+                user.username,
+                user.email,
+                user.phoneNumber,
+                fcmToken
+            )
+        ) ?: return null
+
+        return true
+    }
+
+
+    fun sendEmailVerification(userId: UUID): Any? {
+        val otpResp = userOtpService.createNewOtp(userId.toString()) ?: return null
+
+        notificationService.sendEmailVerificationOtp(userId.toString(), otpResp.otpValue) ?: return null
+
+        return true
+    }
+
+    fun verifyEmail(userId: String, otp: String): Any? {
+        val otpResp = userOtpService.verifyOtp(userId, otp)
+
+        if (!otpResp) return null
+
+        val user = userRepository.findByUserId(userId.toUUID()) ?: return null
+
+        user.isEmailVerified = true
+
+        userRepository.save(user)
+
+        return true
     }
 }

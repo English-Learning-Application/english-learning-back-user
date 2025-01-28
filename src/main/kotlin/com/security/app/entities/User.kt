@@ -52,6 +52,12 @@ class User {
     @Pattern("^(?:\\+84|0)(?:3\\d{8}|5\\d{8}|7\\d{8}|8\\d{8}|9\\d{8})\$\n")
     var phoneNumber: String? = null
 
+    @Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
+    var isEmailVerified: Boolean = false
+
+    @Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
+    var isPhoneNumberVerified: Boolean = false
+
     @CreatedDate
     @Column(nullable = false, updatable = false)
     var createdAt: LocalDateTime = LocalDateTime.now()
