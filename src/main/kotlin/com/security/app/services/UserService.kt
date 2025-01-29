@@ -338,6 +338,27 @@ class UserService(
         return true
     }
 
+    fun sendPhoneNumberVerification(userId: UUID, phoneNumber: String): Any? {
+        val user = userRepository.findByUserId(userId) ?: return null
+
+        notificationService.updateUserNotificationCredential(
+            UpdateUserNotificationCredentialRequest(
+                user.userId.toString(),
+                user.username,
+                user.email,
+                phoneNumber,
+                null
+            )
+        ) ?: return null
+
+        val otpResp = userOtpService.createNewOtp(userId.toString()) ?: return null
+
+        notificationService.sendPhoneNumberVerificationOtp(userId.toString(), otpResp.otpValue) ?: return null
+
+        user.phoneNumber = phoneNumber
+        return userRepository.save(user)
+    }
+
     fun verifyEmail(userId: String, otp: String): Any? {
         val otpResp = userOtpService.verifyOtp(userId, otp)
 
@@ -346,6 +367,20 @@ class UserService(
         val user = userRepository.findByUserId(userId.toUUID()) ?: return null
 
         user.isEmailVerified = true
+
+        userRepository.save(user)
+
+        return true
+    }
+
+    fun verifyPhoneNumber(userId: String, otp: String): Any? {
+        val otpResp = userOtpService.verifyOtp(userId, otp)
+
+        if (!otpResp) return null
+
+        val user = userRepository.findByUserId(userId.toUUID()) ?: return null
+
+        user.isPhoneNumberVerified = true
 
         userRepository.save(user)
 

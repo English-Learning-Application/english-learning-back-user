@@ -4,6 +4,7 @@ import com.security.app.model.Message
 import com.security.app.requests.RegistrationCompletionRequest
 import com.security.app.requests.UpdateFcmTokenRequest
 import com.security.app.requests.VerifyEmailOtpRequest
+import com.security.app.requests.VerifyPhoneNumberRequest
 import com.security.app.services.UserService
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.context.SecurityContextHolder
@@ -23,6 +24,28 @@ class ProfileController(private val userService: UserService) {
             ?: return ResponseEntity.badRequest().body(Message.BadRequest<String>("Failed to update FCM token"))
 
         return ResponseEntity.ok(Message.Success("FCM token updated") {})
+    }
+
+    @PostMapping("/send-phone-verification")
+    fun verifyPhoneNumberRequest(@RequestBody body: VerifyPhoneNumberRequest): ResponseEntity<Any> {
+        val authentication = SecurityContextHolder.getContext().authentication
+        val userId = authentication.name
+
+        userService.sendPhoneNumberVerification(UUID.fromString(userId), body.phoneNumber)
+            ?: return ResponseEntity.badRequest().body(Message.BadRequest<String>("Failed to send phone verification"))
+
+        return ResponseEntity.ok(Message.Success("Phone verification sent") {})
+    }
+
+    @PostMapping("/verify-phone")
+    fun verifyPhoneNumber(@RequestBody request: VerifyEmailOtpRequest): ResponseEntity<Any> {
+        val authentication = SecurityContextHolder.getContext().authentication
+        val userId = authentication.name
+
+        userService.verifyPhoneNumber(userId, request.otpCode)
+            ?: return ResponseEntity.badRequest().body(Message.BadRequest<String>("Failed to verify phone number"))
+
+        return ResponseEntity.ok(Message.Success("Phone number verified") {})
     }
 
     @PostMapping("/send-email-verification")

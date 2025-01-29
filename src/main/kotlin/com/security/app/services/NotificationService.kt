@@ -41,4 +41,23 @@ class NotificationService(
             .block()
     }
 
+    fun sendPhoneNumberVerificationOtp(userId: String, otp: String): Any? {
+        return webClient.post()
+            .uri("$NOTIFICATION_SERVICE_URL/send")
+            .bodyValue(
+                SendNotificationRequest(
+                    notificationType = "otp_confirm_sms",
+                    channels = listOf("sms"),
+                    receiverId = userId,
+                    message = SendNotificationMessage(
+                        otpCode = otp
+                    )
+                )
+            )
+            .retrieve()
+            .bodyToMono(ListMessage.Success::class.java)
+            .block()
+    }
+
+
 }

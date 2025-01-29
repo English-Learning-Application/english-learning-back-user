@@ -21,6 +21,11 @@ spec:
           ports:
             - containerPort: 8081
           env:
+            - name: APP_PORT
+              valueFrom:
+                secretKeyRef:
+                  name: user-service-secret
+                  key: APP_PORT
             - name: MODE
               valueFrom:
                 secretKeyRef:
