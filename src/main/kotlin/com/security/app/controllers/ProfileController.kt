@@ -9,6 +9,7 @@ import com.security.app.services.UserService
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.bind.annotation.*
+import org.springframework.web.multipart.MultipartFile
 import java.util.*
 
 @RestController
@@ -68,6 +69,20 @@ class ProfileController(private val userService: UserService) {
             ?: return ResponseEntity.badRequest().body(Message.BadRequest<String>("Failed to verify email"))
 
         return ResponseEntity.ok(Message.Success("Email verified") {})
+    }
+
+    @PutMapping("/update-avatar")
+    fun updateAvatar(
+        @RequestParam("file") file: MultipartFile,
+        @RequestParam("mediaType") mediaTypeStr: String
+    ): ResponseEntity<Any> {
+        val authentication = SecurityContextHolder.getContext().authentication
+        val userId = authentication.name
+
+        val user = userService.updateAvatar(UUID.fromString(userId), file, mediaTypeStr)
+            ?: return ResponseEntity.badRequest().body(Message.BadRequest<String>("Failed to update avatar"))
+
+        return ResponseEntity.ok(Message.Success("Avatar updated", user))
     }
 
     @GetMapping("/me")

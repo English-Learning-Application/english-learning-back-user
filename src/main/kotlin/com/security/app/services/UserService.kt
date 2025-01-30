@@ -14,11 +14,15 @@ import com.security.app.responses.UserResponse
 import com.security.app.utils.JwtTokenUtils
 import com.security.app.utils.toUUID
 import jakarta.transaction.Transactional
+import org.springframework.core.io.InputStreamResource
+import org.springframework.http.MediaType
+import org.springframework.http.client.MultipartBodyBuilder
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
+import org.springframework.web.multipart.MultipartFile
 import org.springframework.web.reactive.function.client.WebClient
 import java.util.*
 
@@ -278,6 +282,38 @@ class UserService(
         return Gson().fromJson(Gson().toJson(media?.data), MediaModel::class.java)
     }
 
+    private fun uploadUserMedia(media: MultipartFile, mediaType: String): MediaModel? {
+        val multipartData = MultipartBodyBuilder()
+        multipartData.part("file", InputStreamResource(media.inputStream))
+            .filename(media.originalFilename ?: "user_avatar_${UUID.randomUUID()}")
+        multipartData.part("mediaType", mediaType)
+        val mediaItem = webClient.post()
+            .uri("${MEDIA_SERVICE_URL}/upload")
+            .contentType(MediaType.MULTIPART_FORM_DATA)
+            .bodyValue(multipartData.build())
+            .retrieve()
+            .bodyToMono(Message.Success::class.java)
+            .block()
+
+        return Gson().fromJson(Gson().toJson(mediaItem?.data), MediaModel::class.java)
+    }
+
+    private fun updateUserMedia(mediaId: String, media: MultipartFile, mediaType: String): MediaModel? {
+        val multipartData = MultipartBodyBuilder()
+        multipartData.part("file", InputStreamResource(media.inputStream))
+            .filename(media.originalFilename ?: "user_avatar_${UUID.randomUUID()}")
+        multipartData.part("mediaType", mediaType)
+        val mediaItem = webClient.put()
+            .uri("${MEDIA_SERVICE_URL}/${mediaId}")
+            .contentType(MediaType.MULTIPART_FORM_DATA)
+            .bodyValue(multipartData.build())
+            .retrieve()
+            .bodyToMono(Message.Success::class.java)
+            .block()
+
+        return Gson().fromJson(Gson().toJson(mediaItem?.data), MediaModel::class.java)
+    }
+
 
     fun registrationCompletion(request: RegistrationCompletionRequest, userId: UUID): UserResponse? {
         val user = userRepository.findByUserId(userId) ?: return null
@@ -327,6 +363,28 @@ class UserService(
         ) ?: return null
 
         return true
+    }
+
+    fun updateAvatar(userId: UUID, avatar: MultipartFile, mediaType: String): UserResponse? {
+        val user = userRepository.findByUserId(userId) ?: return null
+
+        var mediaModel: MediaModel? = null
+        mediaModel = if (user.mediaId.isEmpty()) {
+            uploadUserMedia(avatar, mediaType)
+        } else {
+            updateUserMedia(user.mediaId, avatar, mediaType)
+        }
+
+        if (mediaModel == null) return null
+
+        user.mediaId = mediaModel.mediaId
+        val savedUser = userRepository.save(user)
+
+        val userResponse = UserResponse.fromUser(savedUser)
+
+        userResponse.media = mediaModel
+
+        return userResponse
     }
 
 
