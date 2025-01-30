@@ -1,11 +1,9 @@
 package com.security.app.controllers
 
 import com.security.app.model.Message
-import com.security.app.requests.RegistrationCompletionRequest
-import com.security.app.requests.UpdateFcmTokenRequest
-import com.security.app.requests.VerifyEmailOtpRequest
-import com.security.app.requests.VerifyPhoneNumberRequest
+import com.security.app.requests.*
 import com.security.app.services.UserService
+import com.security.app.utils.toUUID
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.bind.annotation.*
@@ -108,6 +106,26 @@ class ProfileController(private val userService: UserService) {
 
         return if (user != null) {
             ResponseEntity.ok(Message.Success("User registration completed", user))
+        } else {
+            ResponseEntity.badRequest().body(Message.BadRequest<String>("User not found"))
+        }
+    }
+
+    @PutMapping("/update-profile")
+    fun updateProfile(@RequestBody request: UpdateUserProfileRequest): ResponseEntity<Any> {
+        val authentication = SecurityContextHolder.getContext().authentication
+        val userId = authentication.name
+
+        val user = userService.updateUserProfile(
+            userId.toUUID(),
+            request.nativeLanguage,
+            request.learningLanguage,
+            request.learningTypes,
+            request.username
+        )
+
+        return if (user != null) {
+            ResponseEntity.ok(Message.Success("User profile updated", user))
         } else {
             ResponseEntity.badRequest().body(Message.BadRequest<String>("User not found"))
         }

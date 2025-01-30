@@ -201,6 +201,7 @@ class UserService(
         val userResponse = UserResponse.fromUser(user)
 
         if (user.mediaId.isNotEmpty()) {
+            println("Media ID: ${user.mediaId}")
             val mediaModel = getUserMedia(UUID.fromString(user.mediaId))
 
             userResponse.media = mediaModel ?: return null
@@ -278,6 +279,8 @@ class UserService(
             .retrieve()
             .bodyToMono(Message.Success::class.java)
             .block()
+
+        println("Media: $media")
 
         return Gson().fromJson(Gson().toJson(media?.data), MediaModel::class.java)
     }
@@ -443,5 +446,36 @@ class UserService(
         userRepository.save(user)
 
         return true
+    }
+
+    fun updateUserProfile(
+        userId: UUID,
+        nativeLanguage: String,
+        learningLanguage: String,
+        learningTypes: List<String>,
+        userName: String
+    ): UserResponse? {
+        val user = userRepository.findByUserId(userId) ?: return null
+        val userProfile = user.userProfile ?: return null
+
+        user.username = userName
+        userProfile.nativeLanguage = Language.fromString(nativeLanguage)
+        userProfile.learningLanguage = Language.fromString(learningLanguage)
+
+        if (learningTypes.getOrNull(0) != null) {
+            userProfile.learningTypeOne = LearningType.fromString(learningTypes[0])
+        }
+        if (learningTypes.getOrNull(1) != null) {
+            userProfile.learningTypeTwo = LearningType.fromString(learningTypes[1])
+        }
+        if (learningTypes.getOrNull(2) != null) {
+            userProfile.learningTypeThree = LearningType.fromString(learningTypes[2])
+        }
+
+        val savedUser = userRepository.save(user)
+
+        val userResponse = UserResponse.fromUser(savedUser)
+
+        return userResponse
     }
 }
