@@ -7,7 +7,7 @@ enum class Language(val value: String) {
 
     companion object {
         fun fromString(value: String): Language {
-            return when(value) {
+            return when (value) {
                 "VIETNAMESE" -> VIETNAMESE
                 "ENGLISH" -> ENGLISH
                 "FRENCH" -> FRENCH
@@ -27,7 +27,7 @@ enum class LearningType(val value: String) {
 
     companion object {
         fun fromString(value: String): LearningType {
-            return when(value) {
+            return when (value) {
                 "VOCABULARY" -> VOCABULARY
                 "GRAMMAR" -> GRAMMAR
                 "LISTENING" -> LISTENING
@@ -43,4 +43,38 @@ enum class LearningType(val value: String) {
 enum class RegistrationStatus {
     NOT_CONFIRMED,
     CONFIRMED
+}
+
+enum class UpdateUserProfileType(val serverValue: String) {
+    SUBSCRIPTION("SUBSCRIPTION"),
+    ACHIEVEMENT("ACHIEVEMENT");
+
+    companion object {
+        fun fromString(value: String): UpdateUserProfileType {
+            return when (value) {
+                "SUBSCRIPTION" -> SUBSCRIPTION
+                "ACHIEVEMENT" -> ACHIEVEMENT
+                else -> throw IllegalArgumentException("Update user profile type not found")
+            }
+        }
+    }
+}
+
+enum class DurationLength(val serverValue: String) {
+    DAY("DAY"),
+    WEEK("WEEK"),
+    MONTH("MONTH"),
+    YEAR("YEAR");
+
+    companion object {
+        fun fromServerValue(serverValue: String): DurationLength {
+            return when (serverValue) {
+                "DAY" -> DAY
+                "WEEK" -> WEEK
+                "MONTH" -> MONTH
+                "YEAR" -> YEAR
+                else -> throw IllegalArgumentException("Invalid value $serverValue")
+            }
+        }
+    }
 }

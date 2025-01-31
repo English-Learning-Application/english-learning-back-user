@@ -56,9 +56,9 @@ class SecurityConfig {
     ): SecurityFilterChain {
         http
             .csrf { it.disable() }
-            .cors{ it.disable() }
+            .cors { it.disable() }
             .authorizeHttpRequests {
-                it.requestMatchers("/api/v1/auth/**", "/error", "/").permitAll()
+                it.requestMatchers("/api/v1/auth/**", "/error", "/", "/api/internal/**").permitAll()
                 it.anyRequest().authenticated()
             }
             .sessionManagement {

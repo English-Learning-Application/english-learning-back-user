@@ -4,10 +4,13 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier
 import com.google.gson.Gson
 import com.security.app.entities.User
 import com.security.app.entities.UserProfile
+import com.security.app.entities.UserSubscription
 import com.security.app.model.*
 import com.security.app.repositories.UserRepository
+import com.security.app.repositories.UserSubscriptionRepository
 import com.security.app.requests.RegisterRequest
 import com.security.app.requests.RegistrationCompletionRequest
+import com.security.app.requests.UpdateInternalUserProfileRequest
 import com.security.app.requests.UpdateUserNotificationCredentialRequest
 import com.security.app.responses.LoginResponse
 import com.security.app.responses.UserResponse
@@ -24,6 +27,7 @@ import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import org.springframework.web.multipart.MultipartFile
 import org.springframework.web.reactive.function.client.WebClient
+import java.time.LocalDateTime
 import java.util.*
 
 @Service
@@ -38,6 +42,7 @@ class UserService(
     private val userRefreshTokenService: UserRefreshTokenService,
     private val notificationService: NotificationService,
     private val userOtpService: UserOtpService,
+    private val userSubscriptionRepository: UserSubscriptionRepository,
     private val webClient: WebClient,
 ) {
 
@@ -477,5 +482,52 @@ class UserService(
         val userResponse = UserResponse.fromUser(savedUser)
 
         return userResponse
+    }
+
+    fun updateUserInternalProfile(request: UpdateInternalUserProfileRequest): Any? {
+        val requestType = UpdateUserProfileType.fromString(request.type)
+
+        val user = userRepository.findByUserId(request.userId.toUUID()) ?: return null
+
+        when (requestType) {
+            UpdateUserProfileType.SUBSCRIPTION -> {
+                request.subscription ?: return null
+                val expiredTime = LocalDateTime.now()
+
+                val durationLength = DurationLength.fromServerValue(request.subscription.subscriptionDurationLength)
+                when (durationLength) {
+                    DurationLength.DAY -> {
+                        expiredTime.plusDays(request.subscription.subscriptionDuration.toLong())
+                    }
+
+                    DurationLength.WEEK -> {
+                        expiredTime.plusWeeks(request.subscription.subscriptionDuration.toLong())
+                    }
+
+                    DurationLength.MONTH -> {
+                        expiredTime.plusMonths(request.subscription.subscriptionDuration.toLong())
+                    }
+
+                    DurationLength.YEAR -> {
+                        expiredTime.plusYears(request.subscription.subscriptionDuration.toLong())
+                    }
+
+                }
+
+                val userSubscription = UserSubscription().let {
+                    it.user = user
+                    it.subscriptionId = request.subscription.subscriptionId
+                    it.expiryDate = expiredTime
+                    it
+                }
+
+                val savedUserSubscription = userSubscriptionRepository.save(userSubscription)
+                return savedUserSubscription
+            }
+
+            UpdateUserProfileType.ACHIEVEMENT -> {
+                return true
+            }
+        }
     }
 }
