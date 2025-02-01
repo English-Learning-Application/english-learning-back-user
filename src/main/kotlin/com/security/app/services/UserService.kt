@@ -15,6 +15,7 @@ import com.security.app.requests.UpdateUserNotificationCredentialRequest
 import com.security.app.responses.LoginResponse
 import com.security.app.responses.UserResponse
 import com.security.app.utils.JwtTokenUtils
+import com.security.app.utils.isAfterNow
 import com.security.app.utils.toUUID
 import jakarta.transaction.Transactional
 import org.springframework.core.io.InputStreamResource
@@ -492,24 +493,24 @@ class UserService(
         when (requestType) {
             UpdateUserProfileType.SUBSCRIPTION -> {
                 request.subscription ?: return null
-                val expiredTime = LocalDateTime.now()
+                val currentTime = LocalDateTime.now()
 
                 val durationLength = DurationLength.fromServerValue(request.subscription.subscriptionDurationLength)
-                when (durationLength) {
+                val expiredTime = when (durationLength) {
                     DurationLength.DAY -> {
-                        expiredTime.plusDays(request.subscription.subscriptionDuration.toLong())
+                        currentTime.plusDays(request.subscription.subscriptionDuration.toLong())
                     }
 
                     DurationLength.WEEK -> {
-                        expiredTime.plusWeeks(request.subscription.subscriptionDuration.toLong())
+                        currentTime.plusWeeks(request.subscription.subscriptionDuration.toLong())
                     }
 
                     DurationLength.MONTH -> {
-                        expiredTime.plusMonths(request.subscription.subscriptionDuration.toLong())
+                        currentTime.plusMonths(request.subscription.subscriptionDuration.toLong())
                     }
 
                     DurationLength.YEAR -> {
-                        expiredTime.plusYears(request.subscription.subscriptionDuration.toLong())
+                        currentTime.plusYears(request.subscription.subscriptionDuration.toLong())
                     }
 
                 }
@@ -530,4 +531,23 @@ class UserService(
             }
         }
     }
+
+    fun swapUserSubscriptionPlan(
+        userId: UUID,
+        currentSubscriptionId: String,
+        swapSubscriptionId: String
+    ): Any? {
+        val user = userRepository.findByUserId(userId) ?: return null
+
+        println("User: ${user.userSubscriptions}")
+        val userSubscription =
+            user.userSubscriptions.find { it.subscriptionId == currentSubscriptionId && it.expiryDate.isAfterNow() }
+                ?: return null
+        userSubscription.subscriptionId = swapSubscriptionId
+        println("User Subscription: $userSubscription")
+
+        val savedUserSubscription = userSubscriptionRepository.save(userSubscription)
+        return savedUserSubscription
+    }
+
 }

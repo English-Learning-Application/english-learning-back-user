@@ -14,6 +14,19 @@ import java.util.*
 @RequestMapping("/api/v1/profile")
 class ProfileController(private val userService: UserService) {
 
+    @PutMapping("/swap-subscription-plan")
+    fun swapSubscriptionPlan(@RequestBody request: SwapSubscriptionPlanRequest): ResponseEntity<Any> {
+        val authentication = SecurityContextHolder.getContext().authentication
+        val userId = authentication.name
+
+        val userSubscription =
+            userService.swapUserSubscriptionPlan(userId.toUUID(), request.currentSubscriptionId, request.subscriptionId)
+                ?: return ResponseEntity.badRequest()
+                    .body(Message.BadRequest<String>("Failed to swap subscription plan"))
+
+        return ResponseEntity.ok(Message.Success("Subscription plan swapped", userSubscription))
+    }
+
     @PostMapping("/update-fcm-token")
     fun updateFcmToken(@RequestBody request: UpdateFcmTokenRequest): ResponseEntity<Any> {
         val authentication = SecurityContextHolder.getContext().authentication
