@@ -1,6 +1,6 @@
 package com.security.app.services
 
-import com.security.app.model.ListMessage
+import com.security.app.model.ListMessage.Success
 import com.security.app.model.Message
 import com.security.app.requests.SendNotificationMessage
 import com.security.app.requests.SendNotificationRequest
@@ -20,10 +20,13 @@ class NotificationService(
             .bodyValue(request)
             .retrieve()
             .bodyToMono(Message.Success::class.java)
-            .block()
+            .subscribe()
     }
 
-    fun sendEmailVerificationOtp(userId: String, otp: String): Any? {
+    fun sendEmailVerificationOtp(
+        userId: String,
+        otp: String,
+    ): Any? {
         return webClient.post()
             .uri("$NOTIFICATION_SERVICE_URL/send")
             .bodyValue(
@@ -37,8 +40,8 @@ class NotificationService(
                 )
             )
             .retrieve()
-            .bodyToMono(ListMessage.Success::class.java)
-            .block()
+            .bodyToMono(Success::class.java)
+            .subscribe()
     }
 
     fun sendPhoneNumberVerificationOtp(userId: String, otp: String): Any? {
@@ -55,9 +58,7 @@ class NotificationService(
                 )
             )
             .retrieve()
-            .bodyToMono(ListMessage.Success::class.java)
-            .block()
+            .bodyToMono(Success::class.java)
+            .subscribe()
     }
-
-
 }
