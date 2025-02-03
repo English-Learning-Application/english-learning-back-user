@@ -549,5 +549,4 @@ class UserService(
         val savedUserSubscription = userSubscriptionRepository.save(userSubscription)
         return savedUserSubscription
     }
-
 }
