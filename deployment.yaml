@@ -36,6 +36,11 @@ spec:
                 secretKeyRef:
                   name: user-service-secret
                   key: NOTIFICATION_SERVICE_URL
+            - name: COMMUNITY_SERVICE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: user-service-secret
+                  key: COMMUNITY_SERVICE_URL
             - name: JWT_SECRET
               valueFrom:
                 secretKeyRef:

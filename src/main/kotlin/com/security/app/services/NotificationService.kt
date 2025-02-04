@@ -61,4 +61,18 @@ class NotificationService(
             .bodyToMono(Success::class.java)
             .subscribe()
     }
+
+    fun deleteFcmTokens(userId: String, fcmTokens: List<String>): Any? {
+        return webClient.post()
+            .uri("$NOTIFICATION_SERVICE_URL/credentials/delete-fcm")
+            .bodyValue(
+                mapOf(
+                    "userId" to userId,
+                    "fcmTokens" to fcmTokens
+                )
+            )
+            .retrieve()
+            .bodyToMono(Message.Success::class.java)
+            .subscribe()
+    }
 }

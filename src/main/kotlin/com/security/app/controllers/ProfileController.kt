@@ -38,6 +38,17 @@ class ProfileController(private val userService: UserService) {
         return ResponseEntity.ok(Message.Success("FCM token updated") {})
     }
 
+    @PostMapping("/delete-fcm-token")
+    fun deleteFcmToken(@RequestBody request: DeleteFcmTokenRequest): ResponseEntity<Any> {
+        val authentication = SecurityContextHolder.getContext().authentication
+        val userId = authentication.name
+
+        userService.deleteFcmToken(UUID.fromString(userId), request.fcmTokens ?: emptyList())
+            ?: return ResponseEntity.badRequest().body(Message.BadRequest<String>("Failed to delete FCM token"))
+
+        return ResponseEntity.ok(Message.Success("FCM token deleted") {})
+    }
+
     @PostMapping("/send-phone-verification")
     fun verifyPhoneNumberRequest(@RequestBody body: VerifyPhoneNumberRequest): ResponseEntity<Any> {
         val authentication = SecurityContextHolder.getContext().authentication
@@ -85,12 +96,13 @@ class ProfileController(private val userService: UserService) {
     @PutMapping("/update-avatar")
     fun updateAvatar(
         @RequestParam("file") file: MultipartFile,
-        @RequestParam("mediaType") mediaTypeStr: String
+        @RequestParam("mediaType") mediaTypeStr: String,
+        @RequestHeader("Authorization") authHeader: String
     ): ResponseEntity<Any> {
         val authentication = SecurityContextHolder.getContext().authentication
         val userId = authentication.name
 
-        val user = userService.updateAvatar(UUID.fromString(userId), file, mediaTypeStr)
+        val user = userService.updateAvatar(UUID.fromString(userId), file, mediaTypeStr, authHeader)
             ?: return ResponseEntity.badRequest().body(Message.BadRequest<String>("Failed to update avatar"))
 
         return ResponseEntity.ok(Message.Success("Avatar updated", user))

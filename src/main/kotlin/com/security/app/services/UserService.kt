@@ -44,6 +44,7 @@ class UserService(
     private val notificationService: NotificationService,
     private val userOtpService: UserOtpService,
     private val userSubscriptionRepository: UserSubscriptionRepository,
+    private val communityService: CommunityService,
     private val webClient: WebClient,
 ) {
 
@@ -223,6 +224,14 @@ class UserService(
             )
         ) ?: return null
 
+        communityService.updateMessageUser(
+            user.userId.toString(),
+            user.username,
+            userResponse.media?.mediaUrl ?: "",
+            user.email,
+            user.phoneNumber ?: ""
+        )
+
         return userResponse
     }
 
@@ -374,7 +383,15 @@ class UserService(
         return true
     }
 
-    fun updateAvatar(userId: UUID, avatar: MultipartFile, mediaType: String): UserResponse? {
+    fun deleteFcmToken(userId: UUID, fcmTokens: List<String>): Any? {
+        val user = userRepository.findByUserId(userId) ?: return null
+
+        notificationService.deleteFcmTokens(user.userId.toString(), fcmTokens) ?: return null
+
+        return true
+    }
+
+    fun updateAvatar(userId: UUID, avatar: MultipartFile, mediaType: String, tokenString: String): UserResponse? {
         val user = userRepository.findByUserId(userId) ?: return null
 
         var mediaModel: MediaModel? = null
@@ -390,6 +407,14 @@ class UserService(
         val savedUser = userRepository.save(user)
 
         val userResponse = UserResponse.fromUser(savedUser)
+
+        communityService.updateMessageUser(
+            tokenString,
+            userResponse.username,
+            mediaModel.mediaUrl,
+            userResponse.email,
+            userResponse.phoneNumber ?: ""
+        )
 
         userResponse.media = mediaModel
 
