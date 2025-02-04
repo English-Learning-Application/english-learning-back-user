@@ -203,7 +203,7 @@ class UserService(
         return LoginResponse(accessToken, refreshToken)
     }
 
-    fun getUserInfo(userId: UUID): UserResponse? {
+    fun getUserInfo(userId: UUID, tokenString: String): UserResponse? {
         val user = userRepository.findByUserId(userId) ?: return null
         val userResponse = UserResponse.fromUser(user)
 
@@ -225,7 +225,7 @@ class UserService(
         ) ?: return null
 
         communityService.updateMessageUser(
-            user.userId.toString(),
+            tokenString,
             user.username,
             userResponse.media?.mediaUrl ?: "",
             user.email,

@@ -109,11 +109,13 @@ class ProfileController(private val userService: UserService) {
     }
 
     @GetMapping("/me")
-    fun getProfile(): ResponseEntity<Any> {
+    fun getProfile(
+        @RequestHeader("Authorization") authHeader: String
+    ): ResponseEntity<Any> {
         val authentication = SecurityContextHolder.getContext().authentication
         val userId = authentication.name
 
-        val user = userService.getUserInfo(UUID.fromString(userId))
+        val user = userService.getUserInfo(UUID.fromString(userId), authHeader)
 
         return if (user != null) {
             ResponseEntity.ok(Message.Success("User found", user))
