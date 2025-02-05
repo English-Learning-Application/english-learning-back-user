@@ -78,6 +78,9 @@ class User {
     @OneToMany(mappedBy = "user", cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
     var userAchievements: List<UserAchievement> = mutableListOf()
 
+    @OneToMany(mappedBy = "user", cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
+    var userTodos: List<UserTodo> = mutableListOf()
+
     @Column(nullable = false)
     var registrationStatus: RegistrationStatus = RegistrationStatus.NOT_CONFIRMED
 }
