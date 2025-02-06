@@ -12,28 +12,34 @@ import org.springframework.web.bind.annotation.*
 class AuthController(private val userService: UserService) {
 
     @PostMapping("/register")
-    fun register(@RequestBody request : RegisterRequest, @RequestHeader("X-Device-Id") deviceId: String) : ResponseEntity<Any> {
+    fun register(
+        @RequestBody request: RegisterRequest,
+        @RequestHeader("X-Device-Id") deviceId: String
+    ): ResponseEntity<Any> {
 
-        try{
+        try {
             val loginResponse = userService.registerUser(
                 request, deviceId
             )
 
             return ResponseEntity.ok(Message.Success("User registered successfully", loginResponse))
-        }
-        catch(e: Exception){
+        } catch (e: Exception) {
             return ResponseEntity.badRequest().body(Message.BadRequest<String>(e.message.toString()))
         }
     }
 
     @PostMapping("/refresh-token")
-    fun refreshToken(@RequestHeader("X-Device-Id") deviceId: String, @RequestBody request: RefreshTokenRequest) : ResponseEntity<Any> {
+    fun refreshToken(
+        @RequestHeader("X-Device-Id") deviceId: String,
+        @RequestBody request: RefreshTokenRequest
+    ): ResponseEntity<Any> {
         try {
             val resp = userService.refreshToken(request.refreshToken, deviceId)
-            return if(resp != null) {
+            return if (resp != null) {
                 ResponseEntity.ok(Message.Success("Token refreshed successfully", resp))
-            } else{
-                ResponseEntity.status(HttpStatusCode.valueOf(401)).body(Message.BadRequest<String>("Invalid refresh token"))
+            } else {
+                ResponseEntity.status(HttpStatusCode.valueOf(401))
+                    .body(Message.BadRequest<String>("Invalid refresh token"))
             }
         } catch (e: Exception) {
             return ResponseEntity.badRequest().body(Message.BadRequest<String>(e.message.toString()))
@@ -41,7 +47,10 @@ class AuthController(private val userService: UserService) {
     }
 
     @PostMapping("/google")
-    fun googleRegistration(@RequestBody request: GoogleSignInRequest, @RequestHeader("X-Device-Id") deviceId: String) : ResponseEntity<Any> {
+    fun googleRegistration(
+        @RequestBody request: GoogleSignInRequest,
+        @RequestHeader("X-Device-Id") deviceId: String
+    ): ResponseEntity<Any> {
         try {
             val resp = userService.googleSignInUser(request.idToken, deviceId)
             return ResponseEntity.ok(Message.Success("User registered successfully", resp))
@@ -51,7 +60,10 @@ class AuthController(private val userService: UserService) {
     }
 
     @PostMapping("/facebook")
-    fun facebookRegistration(@RequestBody request: FacebookSignInRequest, @RequestHeader("X-Device-Id") deviceId: String) : ResponseEntity<Any> {
+    fun facebookRegistration(
+        @RequestBody request: FacebookSignInRequest,
+        @RequestHeader("X-Device-Id") deviceId: String
+    ): ResponseEntity<Any> {
         try {
             val resp = userService.facebookSignInUser(request.accessToken, deviceId)
             return ResponseEntity.ok(Message.Success("User registered successfully", resp))
@@ -61,8 +73,7 @@ class AuthController(private val userService: UserService) {
     }
 
     @PostMapping("/login")
-    fun login(@RequestBody request: LoginRequest, @RequestHeader("X-Device-Id") deviceId: String) : ResponseEntity<Any> {
-        println("Login request received")
+    fun login(@RequestBody request: LoginRequest, @RequestHeader("X-Device-Id") deviceId: String): ResponseEntity<Any> {
         val loginResponse = userService.loginUser(
             request.email,
             request.password,

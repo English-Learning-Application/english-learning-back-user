@@ -1,13 +1,15 @@
 package com.security.app.services
 
 import com.security.app.entities.UserTodo
+import com.security.app.repositories.UserRepository
 import com.security.app.repositories.UserTodoRepository
 import com.security.app.utils.toUUID
 import org.springframework.stereotype.Service
 
 @Service
 class UserTodoService(
-    private val userTodoRepository: UserTodoRepository
+    private val userTodoRepository: UserTodoRepository,
+    private val userRepository: UserRepository
 ) {
     fun getAllTodosByUser(
         userId: String
@@ -42,7 +44,9 @@ class UserTodoService(
         type: String,
         priority: String
     ): UserTodo {
+        val user = userRepository.findByUserId(userId.toUUID())
         val userTodo = UserTodo().let {
+            it.user = user
             it.todoType = type
             it.todoTitle = title
             it.todoDescription = description

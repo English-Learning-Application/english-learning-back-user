@@ -12,7 +12,7 @@ class UserRefreshTokenService(
     private val userRefreshTokenRepository: UserRefreshTokenRepository,
 ) {
     @Transactional
-    fun saveRefreshToken(refreshTokenStr: String, user: User, deviceId: String) : UserRefreshToken {
+    fun saveRefreshToken(refreshTokenStr: String, user: User, deviceId: String): UserRefreshToken {
 
         val userRefreshToken = UserRefreshToken().let {
             it.refreshToken = refreshTokenStr
@@ -25,7 +25,7 @@ class UserRefreshTokenService(
     }
 
     @Transactional
-    fun saveUserRefreshToken(userRefreshToken: UserRefreshToken) : UserRefreshToken {
+    fun saveUserRefreshToken(userRefreshToken: UserRefreshToken): UserRefreshToken {
         return userRefreshTokenRepository.save(userRefreshToken)
     }
 
@@ -34,7 +34,7 @@ class UserRefreshTokenService(
         userRefreshTokenRepository.delete(userRefreshToken)
     }
 
-    fun getRefreshTokenByUserIdAndDeviceId(userId: UUID, deviceId: String) : UserRefreshToken? {
+    fun getRefreshTokenByUserIdAndDeviceId(userId: UUID, deviceId: String): List<UserRefreshToken> {
         return userRefreshTokenRepository.findUserRefreshTokenByUserIdAndDeviceId(userId, deviceId)
     }
 }

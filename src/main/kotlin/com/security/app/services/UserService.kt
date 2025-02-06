@@ -62,14 +62,15 @@ class UserService(
         val userRefreshToken =
             userRefreshTokenService.getRefreshTokenByUserIdAndDeviceId(user.userId, deviceId) ?: return null
 
-        if (userRefreshToken.refreshToken == refreshToken && !isTokenStillValid(refreshToken)) {
-            userRefreshTokenService.removeRefreshToken(userRefreshToken)
-            return null
+        for (uRefreshToken in userRefreshToken) {
+            if (uRefreshToken.refreshToken == refreshToken && isTokenStillValid(uRefreshToken.refreshToken)) {
+                return LoginResponse(createAccessToken(user.userId), uRefreshToken.refreshToken)
+            }
         }
 
         val newAccessToken = createAccessToken(user.userId)
 
-        return LoginResponse(newAccessToken, userRefreshToken.refreshToken)
+        return LoginResponse(newAccessToken, refreshToken)
     }
 
     @Transactional
@@ -87,12 +88,13 @@ class UserService(
                 val alreadyExistRefreshToken =
                     userRefreshTokenService.getRefreshTokenByUserIdAndDeviceId(userExists.userId, deviceId)
 
-                if (alreadyExistRefreshToken != null) {
-                    val isStillValid = jwtTokenUtils.isTokenStillValid(alreadyExistRefreshToken.refreshToken)
-                    if (isStillValid) {
-                        return LoginResponse(accessToken, alreadyExistRefreshToken.refreshToken)
-                    } else {
-                        userRefreshTokenService.removeRefreshToken(alreadyExistRefreshToken)
+                if (alreadyExistRefreshToken.isNotEmpty()) {
+                    for (refreshToken in alreadyExistRefreshToken) {
+                        if (refreshToken.refreshToken == accessToken) {
+                            return LoginResponse(accessToken, refreshToken.refreshToken)
+                        } else {
+                            userRefreshTokenService.removeRefreshToken(refreshToken)
+                        }
                     }
                 }
 
@@ -142,12 +144,13 @@ class UserService(
             val alreadyExistRefreshToken =
                 userRefreshTokenService.getRefreshTokenByUserIdAndDeviceId(existingUser.userId, deviceId)
 
-            if (alreadyExistRefreshToken != null) {
-                val isStillValid = jwtTokenUtils.isTokenStillValid(alreadyExistRefreshToken.refreshToken)
-                if (isStillValid) {
-                    return LoginResponse(accessToken, alreadyExistRefreshToken.refreshToken)
-                } else {
-                    userRefreshTokenService.removeRefreshToken(alreadyExistRefreshToken)
+            if (alreadyExistRefreshToken.isNotEmpty()) {
+                for (refreshToken in alreadyExistRefreshToken) {
+                    if (refreshToken.refreshToken == accessToken) {
+                        return LoginResponse(aToken, refreshToken.refreshToken)
+                    } else {
+                        userRefreshTokenService.removeRefreshToken(refreshToken)
+                    }
                 }
             }
 
@@ -251,12 +254,14 @@ class UserService(
         val alreadyExistRefreshToken =
             userRefreshTokenService.getRefreshTokenByUserIdAndDeviceId(userData.userId, deviceId)
 
-        if (alreadyExistRefreshToken != null) {
-            val isStillValid = jwtTokenUtils.isTokenStillValid(alreadyExistRefreshToken.refreshToken)
-            if (isStillValid) {
-                return LoginResponse(accessToken, alreadyExistRefreshToken.refreshToken)
-            } else {
-                userRefreshTokenService.removeRefreshToken(alreadyExistRefreshToken)
+        if (alreadyExistRefreshToken.isNotEmpty()) {
+            for (refreshToken in alreadyExistRefreshToken) {
+                val isStillValid = jwtTokenUtils.isTokenStillValid(refreshToken.refreshToken)
+                if (isStillValid) {
+                    return LoginResponse(accessToken, refreshToken.refreshToken)
+                } else {
+                    userRefreshTokenService.removeRefreshToken(refreshToken)
+                }
             }
         }
 

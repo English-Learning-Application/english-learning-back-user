@@ -7,5 +7,5 @@ import java.util.*
 
 interface UserRefreshTokenRepository : JpaRepository<UserRefreshToken, UUID> {
     @Query("SELECT * FROM user_refresh_tokens WHERE user_id = :userId AND device_id = :deviceId", nativeQuery = true)
-    fun findUserRefreshTokenByUserIdAndDeviceId(userId: UUID, deviceId: String) : UserRefreshToken?
+    fun findUserRefreshTokenByUserIdAndDeviceId(userId: UUID, deviceId: String): List<UserRefreshToken>
 }
