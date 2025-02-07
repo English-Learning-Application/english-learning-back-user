@@ -157,4 +157,18 @@ class ProfileController(private val userService: UserService) {
             ResponseEntity.badRequest().body(Message.BadRequest<String>("User not found"))
         }
     }
+
+    @PutMapping("/update-password")
+    fun updatePassword(@RequestBody request: UpdatePasswordRequest): ResponseEntity<Message<Boolean>> {
+        val authentication = SecurityContextHolder.getContext().authentication
+        val userId = authentication.name
+
+        val resp = userService.updatePassword(userId.toUUID(), request.oldPassword, request.newPassword)
+
+        return if (resp != null) {
+            ResponseEntity.ok(Message.Success("Password updated", resp))
+        } else {
+            ResponseEntity.badRequest().body(Message.BadRequest("Failed to update password"))
+        }
+    }
 }

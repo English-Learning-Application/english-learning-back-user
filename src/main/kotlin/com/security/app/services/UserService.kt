@@ -579,4 +579,28 @@ class UserService(
         val savedUserSubscription = userSubscriptionRepository.save(userSubscription)
         return savedUserSubscription
     }
+
+    fun updatePassword(userId: UUID, oldPassword: String, newPassword: String): Boolean? {
+        val user = userRepository.findByUserId(userId) ?: return null
+
+        if (user.password.isEmpty() && (user.googleId != null || user.facebookId != null)) {
+            if (oldPassword.isNotEmpty()) {
+                return null
+            }
+
+            user.password = passwordEncoder.encode(newPassword)
+            userRepository.save(user)
+            return true
+        }
+
+        if (!passwordEncoder.matches(oldPassword, user.password)) {
+            return null
+        }
+
+        user.password = passwordEncoder.encode(newPassword)
+
+        userRepository.save(user)
+
+        return true
+    }
 }
