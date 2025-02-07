@@ -10,6 +10,15 @@ import org.springframework.web.bind.annotation.*
 @RestController
 @RequestMapping("/api/v1/auth")
 class AuthController(private val userService: UserService) {
+    @PostMapping("/forgot-password")
+    fun forgotPassword(@RequestBody request: ForgotPasswordRequest): ResponseEntity<Any> {
+        try {
+            userService.forgotPassword(request.email, request.phoneNumber)
+            return ResponseEntity.ok(Message.Success("Password reset link sent successfully", {}))
+        } catch (e: Exception) {
+            return ResponseEntity.badRequest().body(Message.BadRequest<String>(e.message.toString()))
+        }
+    }
 
     @PostMapping("/register")
     fun register(

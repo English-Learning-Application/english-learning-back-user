@@ -603,4 +603,27 @@ class UserService(
 
         return true
     }
+
+    fun forgotPassword(email: String?, phoneNumber: String?): Any? {
+        if (email != null) {
+            val user = userRepository.findByEmail(email) ?: return null
+
+            val otpResp = userOtpService.createNewOtp(user.userId.toString()) ?: return null
+
+            notificationService.sendResetPasswordConfirmationEmail(user.userId.toString(), user.email, otpResp.otpValue)
+                ?: return null
+
+        } else if (phoneNumber != null) {
+            val user = userRepository.findByPhoneNumber(phoneNumber) ?: return null
+
+            val otpResp = userOtpService.createNewOtp(user.userId.toString()) ?: return null
+
+            notificationService.sendResetPasswordConfirmationSms(
+                user.userId.toString(),
+                phoneNumber,
+                otpResp.otpValue
+            ) ?: return null
+        }
+        return true
+    }
 }

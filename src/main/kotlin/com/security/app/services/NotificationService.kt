@@ -14,6 +14,42 @@ class NotificationService(
 ) {
     private val NOTIFICATION_SERVICE_URL = System.getenv("NOTIFICATION_SERVICE_URL")
 
+    fun sendResetPasswordConfirmationEmail(userId: String, email: String, otp: String): Any? {
+        return webClient.post()
+            .uri("$NOTIFICATION_SERVICE_URL/send")
+            .bodyValue(
+                SendNotificationRequest(
+                    notificationType = "reset_password_email",
+                    channels = listOf("mail"),
+                    receiverId = userId,
+                    message = SendNotificationMessage(
+                        otpCode = otp
+                    )
+                )
+            )
+            .retrieve()
+            .bodyToMono(Success::class.java)
+            .subscribe()
+    }
+
+    fun sendResetPasswordConfirmationSms(userId: String, phoneNumber: String, otp: String): Any? {
+        return webClient.post()
+            .uri("$NOTIFICATION_SERVICE_URL/send")
+            .bodyValue(
+                SendNotificationRequest(
+                    notificationType = "reset_password_sms",
+                    channels = listOf("sms"),
+                    receiverId = userId,
+                    message = SendNotificationMessage(
+                        otpCode = otp
+                    )
+                )
+            )
+            .retrieve()
+            .bodyToMono(Success::class.java)
+            .subscribe()
+    }
+
     fun updateUserNotificationCredential(request: UpdateUserNotificationCredentialRequest): Any? {
         return webClient.post()
             .uri("$NOTIFICATION_SERVICE_URL/credentials")
