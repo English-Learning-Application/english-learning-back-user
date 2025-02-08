@@ -44,8 +44,12 @@ class UserDataService(
             it.toUUID()
         }
 
-        val mediaModelList = getUserMedia(mediaIdList)
-
+        val mediaModelList =
+            if (mediaIdList.isEmpty()) {
+                emptyList()
+            } else {
+                getUserMedia(mediaIdList)
+            }
         users.forEach { user ->
             val media = mediaModelList.find { it.mediaId == user.mediaId }
             val userResp = UserResponse.fromUser(user)
