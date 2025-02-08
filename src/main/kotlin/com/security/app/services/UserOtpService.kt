@@ -12,7 +12,10 @@ class UserOtpService(
     private val userOTPRepository: UserOTPRepository,
     private val userRepository: UserRepository
 ) {
-    fun createNewOtp(userId: String): UserOTP? {
+    fun createNewOtp(
+        userId: String,
+        typeOfOtp: String
+    ): UserOTP? {
         val user = userRepository.findById(userId.toUUID())
 
         if (user.isPresent) {
@@ -22,6 +25,7 @@ class UserOtpService(
                 it.otpValue = "%04d".format((0..9999).random())
                 it.expiryDate = it.expiryDate.plusMinutes(5)
                 it.isUsed = false
+                it.type = typeOfOtp
                 it
             }
             return userOTPRepository.save(userOTP)
@@ -30,12 +34,16 @@ class UserOtpService(
         }
     }
 
-    fun verifyOtp(userId: String, otp: String): Boolean {
+    fun verifyOtp(
+        userId: String,
+        otp: String,
+        type: String
+    ): Boolean {
         val user = userRepository.findById(userId.toUUID())
         if (user.isPresent) {
             val userOTPs = userOTPRepository.findAllByUserUserIdOrderByCreatedAtDesc(userId.toUUID())
             userOTPs.forEach {
-                if (it.otpValue == otp && !it.isUsed && it.expiryDate.isAfterNow()) {
+                if (it.otpValue == otp && !it.isUsed && it.expiryDate.isAfterNow() && it.type == type) {
                     it.isUsed = true
                     userOTPRepository.save(it)
                     return true

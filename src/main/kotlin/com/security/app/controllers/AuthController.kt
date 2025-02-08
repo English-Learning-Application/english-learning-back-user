@@ -20,6 +20,16 @@ class AuthController(private val userService: UserService) {
         }
     }
 
+    @PostMapping("/reset-password")
+    fun resetPassword(@RequestBody request: ResetPasswordRequest): ResponseEntity<Any> {
+        try {
+            userService.resetPassword(request.email, request.phoneNumber, request.otp, request.newPassword)
+            return ResponseEntity.ok(Message.Success("Password reset successfully", {}))
+        } catch (e: Exception) {
+            return ResponseEntity.badRequest().body(Message.BadRequest<String>(e.message.toString()))
+        }
+    }
+
     @PostMapping("/register")
     fun register(
         @RequestBody request: RegisterRequest,

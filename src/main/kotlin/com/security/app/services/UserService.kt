@@ -428,7 +428,7 @@ class UserService(
 
 
     fun sendEmailVerification(userId: UUID): Any? {
-        val otpResp = userOtpService.createNewOtp(userId.toString()) ?: return null
+        val otpResp = userOtpService.createNewOtp(userId.toString(), "email-verification") ?: return null
 
         notificationService.sendEmailVerificationOtp(userId.toString(), otpResp.otpValue) ?: return null
 
@@ -448,7 +448,10 @@ class UserService(
             )
         ) ?: return null
 
-        val otpResp = userOtpService.createNewOtp(userId.toString()) ?: return null
+        val otpResp = userOtpService.createNewOtp(
+            userId.toString(),
+            "phone-number-verification"
+        ) ?: return null
 
         notificationService.sendPhoneNumberVerificationOtp(userId.toString(), otpResp.otpValue) ?: return null
 
@@ -457,7 +460,7 @@ class UserService(
     }
 
     fun verifyEmail(userId: String, otp: String): Any? {
-        val otpResp = userOtpService.verifyOtp(userId, otp)
+        val otpResp = userOtpService.verifyOtp(userId, otp, "email-verification")
 
         if (!otpResp) return null
 
@@ -471,7 +474,7 @@ class UserService(
     }
 
     fun verifyPhoneNumber(userId: String, otp: String): Any? {
-        val otpResp = userOtpService.verifyOtp(userId, otp)
+        val otpResp = userOtpService.verifyOtp(userId, otp, "phone-number-verification")
 
         if (!otpResp) return null
 
@@ -608,7 +611,10 @@ class UserService(
         if (email != null) {
             val user = userRepository.findByEmail(email) ?: return null
 
-            val otpResp = userOtpService.createNewOtp(user.userId.toString()) ?: return null
+            val otpResp = userOtpService.createNewOtp(
+                user.userId.toString(),
+                "reset-password"
+            ) ?: return null
 
             notificationService.sendResetPasswordConfirmationEmail(user.userId.toString(), user.email, otpResp.otpValue)
                 ?: return null
@@ -616,7 +622,10 @@ class UserService(
         } else if (phoneNumber != null) {
             val user = userRepository.findByPhoneNumber(phoneNumber) ?: return null
 
-            val otpResp = userOtpService.createNewOtp(user.userId.toString()) ?: return null
+            val otpResp = userOtpService.createNewOtp(
+                user.userId.toString(),
+                "reset-password"
+            ) ?: return null
 
             notificationService.sendResetPasswordConfirmationSms(
                 user.userId.toString(),
@@ -625,5 +634,21 @@ class UserService(
             ) ?: return null
         }
         return true
+    }
+
+    fun resetPassword(email: String?, phoneNumber: String?, otp: String, newPassword: String) {
+        val user = if (email != null) {
+            userRepository.findByEmail(email)
+        } else {
+            userRepository.findByPhoneNumber(phoneNumber ?: "")
+        } ?: return
+
+        val otpResp = userOtpService.verifyOtp(user.userId.toString(), otp, "reset-password")
+
+        if (!otpResp) return
+
+        user.password = passwordEncoder.encode(newPassword)
+
+        userRepository.save(user)
     }
 }

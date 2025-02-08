@@ -38,6 +38,10 @@ class UserOTP {
     @Column(nullable = false)
     var isUsed: Boolean = false
 
+    // Type of OTP (e.g. forgot-password, email-verification)
+    @Column(nullable = false, length = 50, columnDefinition = "varchar(50) default ''")
+    var type: String = ""
+
     @CreatedDate
     @Column(nullable = false, updatable = false)
     var createdAt: LocalDateTime = LocalDateTime.now()
