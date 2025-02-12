@@ -20,8 +20,19 @@ phases:
       - echo Writing image definitions file...
       - echo "export IMAGE_TAG=$IMAGE_TAG" > image_tag.txt
       - echo "Updating Kubernetes deployment..."
-      - echo "Logging into AWS CLI..."
-      - aws sts get-caller-identity  # This command ensures authentication is valid
+      -
+      # Retrieve AWS credentials from Secrets Manager
+      - echo "Retrieving AWS credentials from Secrets Manager..."
+      - SECRET=$(aws secretsmanager get-secret-value --secret-id my/aws-credentials --query SecretString --output text)
+
+      # Extract credentials from the secret
+      - export AWS_ACCESS_KEY_ID=$(echo $SECRET | jq -r .aws_access_key_id)
+      - export AWS_SECRET_ACCESS_KEY=$(echo $SECRET | jq -r .aws_secret_access_key)
+
+      - aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
+      - aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
+      - aws configure set region ap-southeast-2
+
       - aws eks update-kubeconfig --region ap-southeast-2 --name aws-dev-cluster
       - kubectl config use-context arn:aws:eks:ap-southeast-2:761018889743:cluster/aws-dev-cluster
       - kubectl apply -f deployment.yaml
