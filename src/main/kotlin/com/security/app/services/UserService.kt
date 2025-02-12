@@ -211,7 +211,6 @@ class UserService(
         val userResponse = UserResponse.fromUser(user)
 
         if (user.mediaId.isNotEmpty()) {
-            println("Media ID: ${user.mediaId}")
             val mediaModel = getUserMedia(UUID.fromString(user.mediaId))
 
             userResponse.media = mediaModel ?: return null
@@ -299,8 +298,6 @@ class UserService(
             .retrieve()
             .bodyToMono(Message.Success::class.java)
             .block()
-
-        println("Media: $media")
 
         return Gson().fromJson(Gson().toJson(media?.data), MediaModel::class.java)
     }
@@ -572,12 +569,10 @@ class UserService(
     ): Any? {
         val user = userRepository.findByUserId(userId) ?: return null
 
-        println("User: ${user.userSubscriptions}")
         val userSubscription =
             user.userSubscriptions.find { it.subscriptionId == currentSubscriptionId && it.expiryDate.isAfterNow() }
                 ?: return null
         userSubscription.subscriptionId = swapSubscriptionId
-        println("User Subscription: $userSubscription")
 
         val savedUserSubscription = userSubscriptionRepository.save(userSubscription)
         return savedUserSubscription

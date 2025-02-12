@@ -7,11 +7,10 @@ import java.util.*
 import javax.crypto.spec.SecretKeySpec
 
 @Component
-class JwtTokenUtils
-{
+class JwtTokenUtils {
     private val secret: String = System.getenv("JWT_SECRET")
 
-    private val jwtIssuer : String = System.getenv("JWT_ISSUER")
+    private val jwtIssuer: String = System.getenv("JWT_ISSUER")
     private val signingKey: SecretKeySpec
         get() {
             val keyBytes: ByteArray = Base64.getDecoder().decode(secret)
@@ -49,7 +48,7 @@ class JwtTokenUtils
                 .parseClaimsJws(token)
                 .body
         } catch (ex: Exception) {
-            println("Exception: ${ex.message}")
+            ex.printStackTrace()
         }
         return null
     }

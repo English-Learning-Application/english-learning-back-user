@@ -17,7 +17,6 @@ class UserDataService(
 ) {
     private val MEDIA_SERVICE_URL = System.getenv("MEDIA_SERVICE_URL")
     private fun getUserMedia(mediaIds: List<UUID>): List<MediaModel> {
-        println("Media URL: ${MEDIA_SERVICE_URL}/query?q=${mediaIds.joinToString(",")}")
         webClient.get()
             .uri("${MEDIA_SERVICE_URL}/query?q=${mediaIds.joinToString(",")}")
             .retrieve()
