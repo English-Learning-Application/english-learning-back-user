@@ -23,6 +23,7 @@ import java.util.*
 @EntityListeners(AuditingEntityListener::class)
 @Table(name = "users")
 class User {
+
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     lateinit var userId: UUID
