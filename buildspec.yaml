@@ -20,8 +20,7 @@ phases:
       - echo Writing image definitions file...
       - echo "export IMAGE_TAG=$IMAGE_TAG" > image_tag.txt
       - echo "Updating Kubernetes deployment..."
-      - sed -i "s|image:
-          .*|image: 761018889743.dkr.ecr.ap-southeast-2.amazonaws.com/user-microservice:$IMAGE_TAG|g" deployment.yaml
+      - sed -i "s|image:.*|image: 761018889743.dkr.ecr.ap-southeast-2.amazonaws.com/user-microservice:$IMAGE_TAG|g" deployment.yaml
       - aws eks update-kubeconfig --region ap-southeast-2 --name my-eks-cluster
       - kubectl apply -f deployment.yaml
       - kubectl rollout restart deployment user-service-deployment
