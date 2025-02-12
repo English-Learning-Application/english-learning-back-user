@@ -20,11 +20,10 @@ phases:
       - echo Writing image definitions file...
       - echo "export IMAGE_TAG=$IMAGE_TAG" > image_tag.txt
       - echo "Updating Kubernetes deployment..."
+      - echo "Logging into AWS CLI..."
+      - aws sts get-caller-identity  # This command ensures authentication is valid
       - aws eks update-kubeconfig --region ap-southeast-2 --name aws-dev-cluster
       - kubectl config use-context arn:aws:eks:ap-southeast-2:761018889743:cluster/aws-dev-cluster
-      - export AWS_ACCESS_KEY_ID=$(aws sts get-session-token --duration-seconds 3600 --query "Credentials.AccessKeyId" --output text)
-      - export AWS_SECRET_ACCESS_KEY=$(aws sts get-session-token --duration-seconds 3600 --query "Credentials.SecretAccessKey" --output text)
-      - export AWS_SESSION_TOKEN=$(aws sts get-session-token --duration-seconds 3600 --query "Credentials.SessionToken" --output text)
       - kubectl apply -f deployment.yaml
       - kubectl rollout restart deployment user-service-deployment
 
