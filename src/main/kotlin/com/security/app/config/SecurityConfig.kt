@@ -25,7 +25,7 @@ import org.springframework.web.reactive.function.client.WebClient
 @Configuration
 @EnableWebSecurity
 class SecurityConfig {
-    val googleClientId = System.getenv()["GOOGLE_CLIENT_ID"]
+    private final val googleClientId = System.getenv("GOOGLE_CLIENT_ID")
 
     @Bean
     fun webClient(): WebClient {
