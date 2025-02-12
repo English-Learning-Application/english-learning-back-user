@@ -5,7 +5,7 @@ phases:
     commands:
       - echo Logging in to Amazon ECR...
       - aws ecr get-login-password --region ap-southeast-2 | docker login --username AWS --password-stdin 761018889743.dkr.ecr.ap-southeast-2.amazonaws.com
-      - IMAGE_TAG=$(git rev-parse --short HEAD)
+      - IMAGE_TAG=$(git -C $CODEBUILD_SRC_DIR rev-parse --short HEAD)
 
   build:
     commands:
