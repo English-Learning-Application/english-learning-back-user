@@ -22,7 +22,7 @@ phases:
       - echo "Updating Kubernetes deployment..."
       - |
         sed -i "s|image:.*|image: 761018889743.dkr.ecr.ap-southeast-2.amazonaws.com/user-microservice:$IMAGE_TAG|g" deployment.yaml
-      - aws eks update-kubeconfig --region ap-southeast-2 --name my-eks-cluster
+      - aws eks update-kubeconfig --region ap-southeast-2 --name aws-dev-cluster
       - kubectl apply -f deployment.yaml
       - kubectl rollout restart deployment user-service-deployment
 
