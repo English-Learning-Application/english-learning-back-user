@@ -10,7 +10,7 @@ phases:
   build:
     commands:
       - echo Building the Docker image...
-      - docker build -t user-microservice:$IMAGE_TAG .
+      - docker build -t user-microservice .
       - docker tag user-microservice:$IMAGE_TAG 761018889743.dkr.ecr.ap-southeast-2.amazonaws.com/user-microservice:$IMAGE_TAG
 
   post_build:
