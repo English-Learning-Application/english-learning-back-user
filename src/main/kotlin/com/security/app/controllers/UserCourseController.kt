@@ -30,6 +30,30 @@ class UserCourseController(
         }
     }
 
+    @DeleteMapping("/bookmarks")
+    fun removeBookmarkCourse(
+        @RequestBody userBookmarkedCourse: UserBookmarkedCourse,
+    ): ResponseEntity<Message<Boolean>> {
+        val authentication = SecurityContextHolder.getContext().authentication
+        val userId = authentication.name
+        try {
+            val isRemoved = userBookmarkedCourseService.removeBookmarkCourse(
+                userId = userId,
+                courseId = userBookmarkedCourse.courseId,
+                courseType = userBookmarkedCourse.courseType
+            )
+            
+            return if (isRemoved) {
+                ResponseEntity.ok(Message.Success("Course removed from bookmarks successfully", true))
+            } else {
+                ResponseEntity.badRequest().body(Message.BadRequest("Failed to remove course from bookmarks"))
+            }
+        } catch (e: Exception) {
+            return ResponseEntity.badRequest()
+                .body(Message.BadRequest("An error occurred while removing course from bookmarks"))
+        }
+    }
+
     @GetMapping("/bookmarks/{courseId}")
     fun isCourseBookmarked(
         @PathVariable("courseId") courseId: String,

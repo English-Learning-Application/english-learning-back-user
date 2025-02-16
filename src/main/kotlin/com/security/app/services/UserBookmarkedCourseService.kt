@@ -30,6 +30,19 @@ class UserBookmarkedCourseService(
         return userBookmarkedCourseRepository.save(userBookmarkedCourse)
     }
 
+    fun removeBookmarkCourse(userId: String, courseId: String, courseType: String): Boolean {
+        val userData = userRepository.findByUserId(userId.toUUID()) ?: return false
+
+        val existedBookmark = userBookmarkedCourseRepository.findByUser_UserIdAndCourseIdAndCourseType(
+            userData.userId,
+            courseId,
+            courseType
+        ) ?: return false
+
+        userBookmarkedCourseRepository.delete(existedBookmark)
+        return true
+    }
+
     fun getUserBookmarkedCourses(userId: String): List<UserBookmarkedCourse> {
         return userBookmarkedCourseRepository.findAllByUser_UserId(userId.toUUID())
     }
