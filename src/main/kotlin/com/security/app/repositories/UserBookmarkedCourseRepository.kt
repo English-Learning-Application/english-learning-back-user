@@ -11,4 +11,9 @@ interface UserBookmarkedCourseRepository : JpaRepository<UserBookmarkedCourse, U
         courseId: String,
         courseType: String
     ): UserBookmarkedCourse?
+
+    fun findByUser_UserIdAndCourseId(
+        userUserId: UUID,
+        courseId: String
+    ): UserBookmarkedCourse?
 }

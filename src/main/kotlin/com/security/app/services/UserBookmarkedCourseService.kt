@@ -33,4 +33,9 @@ class UserBookmarkedCourseService(
     fun getUserBookmarkedCourses(userId: String): List<UserBookmarkedCourse> {
         return userBookmarkedCourseRepository.findAllByUser_UserId(userId.toUUID())
     }
+
+    fun isCourseBookmarked(userId: String, courseId: String): Boolean {
+        return userBookmarkedCourseRepository.findByUser_UserIdAndCourseId(userId.toUUID(), courseId) != null
+    }
+
 }

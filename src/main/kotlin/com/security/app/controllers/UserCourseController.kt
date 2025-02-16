@@ -5,16 +5,13 @@ import com.security.app.model.Message
 import com.security.app.services.UserBookmarkedCourseService
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.context.SecurityContextHolder
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 
 @RestController("/api/v1/course")
 class UserCourseController(
     private val userBookmarkedCourseService: UserBookmarkedCourseService
 ) {
-    @PostMapping("/bookmark")
+    @PostMapping("/bookmarks")
     fun bookmarkCourse(
         @RequestBody userBookmarkedCourse: UserBookmarkedCourse,
     ): ResponseEntity<Message<UserBookmarkedCourse>> {
@@ -30,6 +27,21 @@ class UserCourseController(
         } catch (e: Exception) {
             return ResponseEntity.badRequest()
                 .body(Message.BadRequest("An error occurred while bookmarking course"))
+        }
+    }
+
+    @GetMapping("/bookmarks/{courseId}")
+    fun isCourseBookmarked(
+        @PathVariable("courseId") courseId: String,
+    ): ResponseEntity<Message<Boolean>> {
+        val authentication = SecurityContextHolder.getContext().authentication
+        val userId = authentication.name
+        try {
+            val isBookmarked = userBookmarkedCourseService.isCourseBookmarked(userId, courseId)
+            return ResponseEntity.ok(Message.Success("Course bookmarked status fetched successfully", isBookmarked))
+        } catch (e: Exception) {
+            return ResponseEntity.badRequest()
+                .body(Message.BadRequest("An error occurred while fetching bookmarked status"))
         }
     }
 
