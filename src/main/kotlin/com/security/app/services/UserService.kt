@@ -82,21 +82,21 @@ class UserService(
 
             val userExists = userRepository.findByEmail(email)
 
-            if (userExists?.googleId != null) {
-                val accessToken = createAccessToken(userExists.userId)
+            if (userExists != null) {
+                if (userExists.googleId == null) {
+                    userExists.googleId = payload.subject
+                    userRepository.save(userExists)
+                }
 
-                val alreadyExistRefreshToken =
+                val accessToken = createAccessToken(userExists.userId)
+                val existingTokens =
                     userRefreshTokenService.getRefreshTokenByUserIdAndDeviceId(userExists.userId, deviceId)
 
-                if (alreadyExistRefreshToken.isNotEmpty()) {
-                    for (refreshToken in alreadyExistRefreshToken) {
-                        if (refreshToken.refreshToken == accessToken) {
-                            return LoginResponse(accessToken, refreshToken.refreshToken)
-                        } else {
-                            userRefreshTokenService.removeRefreshToken(refreshToken)
-                        }
-                    }
+                existingTokens.firstOrNull { jwtTokenUtils.isTokenStillValid(it.refreshToken) }?.let {
+                    return LoginResponse(accessToken, it.refreshToken)
                 }
+
+                existingTokens.forEach(userRefreshTokenService::removeRefreshToken)
 
                 val refreshToken = createRefreshToken(userExists.userId)
                 userRefreshTokenService.saveRefreshToken(refreshToken, userExists, deviceId)
@@ -138,24 +138,24 @@ class UserService(
         val email = facebookUserData.email ?: return null
 
         val existingUser = userRepository.findByEmail(email)
-        if (existingUser?.facebookId != null) {
-            val aToken = createAccessToken(existingUser.userId)
+        if (existingUser != null) {
+            val user = if (existingUser.facebookId == null) {
+                existingUser.facebookId = facebookUserData.id
+                saveUser(existingUser)
+            } else existingUser
 
-            val alreadyExistRefreshToken =
-                userRefreshTokenService.getRefreshTokenByUserIdAndDeviceId(existingUser.userId, deviceId)
+            val aToken = createAccessToken(user.userId)
+            val existingTokens = userRefreshTokenService.getRefreshTokenByUserIdAndDeviceId(user.userId, deviceId)
 
-            if (alreadyExistRefreshToken.isNotEmpty()) {
-                for (refreshToken in alreadyExistRefreshToken) {
-                    if (refreshToken.refreshToken == accessToken) {
-                        return LoginResponse(aToken, refreshToken.refreshToken)
-                    } else {
-                        userRefreshTokenService.removeRefreshToken(refreshToken)
-                    }
-                }
+            existingTokens.firstOrNull { jwtTokenUtils.isTokenStillValid(it.refreshToken) }?.let {
+                return LoginResponse(aToken, it.refreshToken)
             }
 
-            val refreshToken = createRefreshToken(existingUser.userId)
-            userRefreshTokenService.saveRefreshToken(refreshToken, existingUser, deviceId)
+            existingTokens.forEach(userRefreshTokenService::removeRefreshToken)
+
+            val refreshToken = createRefreshToken(user.userId)
+            userRefreshTokenService.saveRefreshToken(refreshToken, user, deviceId)
+
             return LoginResponse(aToken, refreshToken)
         }
 

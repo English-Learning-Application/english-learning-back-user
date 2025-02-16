@@ -16,7 +16,7 @@ class AuthController(private val userService: UserService) {
             userService.forgotPassword(request.email, request.phoneNumber)
             return ResponseEntity.ok(Message.Success("Password reset link sent successfully", {}))
         } catch (e: Exception) {
-            return ResponseEntity.badRequest().body(Message.BadRequest<String>(e.message.toString()))
+            return ResponseEntity.badRequest().body(Message.BadRequest<String>("Invalid email or phone number"))
         }
     }
 
@@ -26,7 +26,7 @@ class AuthController(private val userService: UserService) {
             userService.resetPassword(request.email, request.phoneNumber, request.otp, request.newPassword)
             return ResponseEntity.ok(Message.Success("Password reset successfully", {}))
         } catch (e: Exception) {
-            return ResponseEntity.badRequest().body(Message.BadRequest<String>(e.message.toString()))
+            return ResponseEntity.badRequest().body(Message.BadRequest<String>("Invalid email or phone number"))
         }
     }
 
@@ -43,7 +43,7 @@ class AuthController(private val userService: UserService) {
 
             return ResponseEntity.ok(Message.Success("User registered successfully", loginResponse))
         } catch (e: Exception) {
-            return ResponseEntity.badRequest().body(Message.BadRequest<String>(e.message.toString()))
+            return ResponseEntity.badRequest().body(Message.BadRequest<String>("Invalid email or phone number"))
         }
     }
 
@@ -61,7 +61,7 @@ class AuthController(private val userService: UserService) {
                     .body(Message.BadRequest<String>("Invalid refresh token"))
             }
         } catch (e: Exception) {
-            return ResponseEntity.badRequest().body(Message.BadRequest<String>(e.message.toString()))
+            return ResponseEntity.badRequest().body(Message.BadRequest<String>("Invalid refresh token"))
         }
     }
 
@@ -74,7 +74,7 @@ class AuthController(private val userService: UserService) {
             val resp = userService.googleSignInUser(request.idToken, deviceId)
             return ResponseEntity.ok(Message.Success("User registered successfully", resp))
         } catch (e: Exception) {
-            return ResponseEntity.badRequest().body(Message.BadRequest<String>(e.message.toString()))
+            return ResponseEntity.badRequest().body(Message.BadRequest<String>("Invalid email or phone number"))
         }
     }
 
@@ -87,7 +87,7 @@ class AuthController(private val userService: UserService) {
             val resp = userService.facebookSignInUser(request.accessToken, deviceId)
             return ResponseEntity.ok(Message.Success("User registered successfully", resp))
         } catch (e: Exception) {
-            return ResponseEntity.badRequest().body(Message.BadRequest<String>(e.message.toString()))
+            return ResponseEntity.badRequest().body(Message.BadRequest<String>("Invalid email or phone number"))
         }
     }
 
