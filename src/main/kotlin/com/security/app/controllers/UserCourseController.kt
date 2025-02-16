@@ -2,6 +2,7 @@ package com.security.app.controllers
 
 import com.security.app.entities.UserBookmarkedCourse
 import com.security.app.model.Message
+import com.security.app.requests.BookmarkCourseRequest
 import com.security.app.services.UserBookmarkedCourseService
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.context.SecurityContextHolder
@@ -13,7 +14,7 @@ class UserCourseController(
 ) {
     @PostMapping("/bookmarks")
     fun bookmarkCourse(
-        @RequestBody userBookmarkedCourse: UserBookmarkedCourse,
+        @RequestBody userBookmarkedCourse: BookmarkCourseRequest,
     ): ResponseEntity<Message<UserBookmarkedCourse>> {
         val authentication = SecurityContextHolder.getContext().authentication
         val userId = authentication.name
@@ -32,7 +33,7 @@ class UserCourseController(
 
     @DeleteMapping("/bookmarks")
     fun removeBookmarkCourse(
-        @RequestBody userBookmarkedCourse: UserBookmarkedCourse,
+        @RequestBody userBookmarkedCourse: BookmarkCourseRequest,
     ): ResponseEntity<Message<Boolean>> {
         val authentication = SecurityContextHolder.getContext().authentication
         val userId = authentication.name
@@ -42,7 +43,7 @@ class UserCourseController(
                 courseId = userBookmarkedCourse.courseId,
                 courseType = userBookmarkedCourse.courseType
             )
-            
+
             return if (isRemoved) {
                 ResponseEntity.ok(Message.Success("Course removed from bookmarks successfully", true))
             } else {
