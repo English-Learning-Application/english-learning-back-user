@@ -8,7 +8,8 @@ import org.springframework.http.ResponseEntity
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.bind.annotation.*
 
-@RestController("/api/v1/course")
+@RestController
+@RequestMapping("/api/v1/course")
 class UserCourseController(
     private val userBookmarkedCourseService: UserBookmarkedCourseService
 ) {
