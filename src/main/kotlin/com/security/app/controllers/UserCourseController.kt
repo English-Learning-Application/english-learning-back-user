@@ -1,6 +1,7 @@
 package com.security.app.controllers
 
 import com.security.app.entities.UserBookmarkedCourse
+import com.security.app.model.ListMessage
 import com.security.app.model.Message
 import com.security.app.requests.BookmarkCourseRequest
 import com.security.app.services.UserBookmarkedCourseService
@@ -72,15 +73,20 @@ class UserCourseController(
     }
 
     @GetMapping("/bookmarks")
-    fun getUserBookmarkedCourses(): ResponseEntity<Message<List<UserBookmarkedCourse>>> {
+    fun getUserBookmarkedCourses(): ResponseEntity<ListMessage<UserBookmarkedCourse>> {
         val authentication = SecurityContextHolder.getContext().authentication
         val userId = authentication.name
         try {
             val bookmarkedCourses = userBookmarkedCourseService.getUserBookmarkedCourses(userId)
-            return ResponseEntity.ok(Message.Success("User bookmarked courses fetched successfully", bookmarkedCourses))
+            return ResponseEntity.ok(
+                ListMessage.Success(
+                    "User bookmarked courses fetched successfully",
+                    bookmarkedCourses
+                )
+            )
         } catch (e: Exception) {
             return ResponseEntity.badRequest()
-                .body(Message.BadRequest("An error occurred while fetching bookmarked courses"))
+                .body(ListMessage.BadRequest("An error occurred while fetching bookmarked courses"))
         }
     }
 }
