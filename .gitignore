@@ -41,3 +41,4 @@ pipeline.json
 .kotlin
 .env
 user-service.env
+local.env

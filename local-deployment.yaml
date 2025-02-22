@@ -1,0 +1,118 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: user-service-deployment
+  labels:
+    app: user-service
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: user-service
+  template:
+    metadata:
+      labels:
+        app: user-service
+    spec:
+      containers:
+        - name: user-service-container
+          imagePullPolicy: Never
+          image: "user-microservice:latest"
+          ports:
+            - containerPort: 8081
+          env:
+            - name: APP_PORT
+              valueFrom:
+                secretKeyRef:
+                  name: user-service-secret
+                  key: APP_PORT
+            - name: MODE
+              valueFrom:
+                secretKeyRef:
+                  name: user-service-secret
+                  key: MODE
+            - name: NOTIFICATION_SERVICE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: user-service-secret
+                  key: NOTIFICATION_SERVICE_URL
+            - name: COMMUNITY_SERVICE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: user-service-secret
+                  key: COMMUNITY_SERVICE_URL
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: user-service-secret
+                  key: JWT_SECRET
+            - name: JWT_ISSUER
+              valueFrom:
+                secretKeyRef:
+                  name: user-service-secret
+                  key: SECRET_ISSUER
+            - name: GOOGLE_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: user-service-secret
+                  key: GOOGLE_CLIENT_ID
+            - name: FACEBOOK_APP_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: user-service-secret
+                  key: FACEBOOK_APP_SECRET
+            - name: FACEBOOK_APP_ID
+              valueFrom:
+                secretKeyRef:
+                  name: user-service-secret
+                  key: FACEBOOK_APP_ID
+            - name: DB_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: user-service-secret
+                  key: DB_HOST
+            - name: DB_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: user-service-secret
+                  key: DB_NAME
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: user-service-secret
+                  key: DB_PASSWORD
+            - name: DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: user-service-secret
+                  key: DB_USER
+            - name: DB_PORT
+              valueFrom:
+                secretKeyRef:
+                  name: user-service-secret
+                  key: DB_PORT
+            - name: MEDIA_SERVICE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: user-service-secret
+                  key: MEDIA_SERVICE_URL
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "512m"
+            limits:
+              memory: "512Mi"
+              cpu: "1"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: user-cluster-ip-service
+spec:
+  selector:
+    app: user-service
+  ports:
+    - protocol: TCP
+      port: 8081
+      targetPort: 8081
+  type: LoadBalancer
