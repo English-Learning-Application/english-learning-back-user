@@ -30,6 +30,7 @@ class InternalController(
     fun updateUserProgress(
         @RequestBody request: UpdateUserAchievementsRequest
     ): ResponseEntity<Message<Any?>> {
+        println("Request: $request")
         try {
             userAchievementService.addUserAchievement(request.userId.toUUID(), request.achievementId.toUUID())
             return ResponseEntity.ok(Message.Success("User achievements updated successfully", {}))
