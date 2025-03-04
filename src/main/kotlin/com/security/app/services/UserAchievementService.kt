@@ -25,4 +25,8 @@ class UserAchievementService(
         }
         userAchievementRepository.save(userAchievement)
     }
+
+    fun getUserAchievements(userId: UUID): List<UserAchievement> {
+        return userAchievementRepository.findAllByUser_UserId(userId)
+    }
 }
